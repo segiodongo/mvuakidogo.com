@@ -243,33 +243,301 @@ function closeWinLightbox() {
   document.body.style.overflow = "";
 }
 
-// ── Film ──────────────────────────────────────────────────────────────────────
+// ── Film — DVR-guide UI (TiVo homage) ─────────────────────────────────────────
+
+// Custom "mvua" emblem — original homage to the satellite-broadcaster mark:
+// a skewed blue tile with white satellite arcs and the mvua wordmark beneath.
+const MVUA_LOGO = `
+  <svg class="tv-logo" viewBox="0 0 150 86" aria-label="mvua">
+    <defs>
+      <linearGradient id="mvuaBlue" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#8aa0ff"/>
+        <stop offset="0.5" stop-color="#5560e0"/>
+        <stop offset="1" stop-color="#2a2f9c"/>
+      </linearGradient>
+    </defs>
+    <g transform="skewX(-10)">
+      <rect x="26" y="3" width="92" height="50" rx="11" fill="url(#mvuaBlue)"/>
+      <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round">
+        <path d="M46 42 q22 -28 54 -16" opacity="0.95"/>
+        <path d="M50 47 q18 -20 44 -12" opacity="0.8"/>
+        <path d="M54 51 q14 -13 33 -8" opacity="0.6"/>
+      </g>
+      <circle cx="50" cy="46" r="4.5" fill="#fff"/>
+    </g>
+    <text x="62" y="80" text-anchor="middle" font-family="'Trebuchet MS',Verdana,sans-serif"
+          font-size="20" font-weight="800" letter-spacing="3" fill="#e6ebff">mvua</text>
+  </svg>`;
 
 function renderFilm(films, media) {
-  const list = document.querySelector(".film-list");
+  const root = document.getElementById("tivo");
+  let view = "list";        // "list" | "detail" | "player"
+  let selected = 0;
+  let current = -1;
+  let playing = false;
+  let progress = 0, posSec = 0, durSec = 0;
 
-  films.forEach((film) => {
-    const entry = document.createElement("div");
-    entry.className = "film-entry";
+  const filmMeta = (f) => [f.year, f.duration, ...(f.tags || [])].filter(Boolean).join("  ·  ");
 
-    let embedSrc = "";
-    if (film.embed) {
-      if (film.embed.platform === "vimeo") {
-        embedSrc = `https://player.vimeo.com/video/${film.embed.id}`;
-      } else if (film.embed.platform === "youtube") {
-        embedSrc = `https://www.youtube.com/embed/${film.embed.id}`;
-      }
+  // ----- video player engine (created lazily in player view) -----
+  let player = null;
+
+  // ----- LIST (Now Playing) -----
+  function renderList() {
+    view = "list";
+    root.className = "tivo view-list";
+    root.innerHTML = `
+      <header class="tv-header">
+        ${MVUA_LOGO}
+        <h1 class="tv-title">Now Playing List</h1>
+        <div class="tv-watermarks" aria-hidden="true">
+          <span class="tv-wm tv-wm-1">mvua</span>
+          <span class="tv-wm tv-wm-2">mvua</span>
+          <span class="tv-wm tv-wm-3">mvua</span>
+        </div>
+      </header>
+      <div class="tv-panel">
+        <span class="tv-scroll tv-scroll-up">&#9650;</span>
+        <ul class="tivo-list" id="tivo-list">
+          ${films.map((film, i) => `
+            <li class="tivo-row${i === selected ? " selected" : ""}" data-i="${i}">
+              <span class="row-chev row-chev-l">&#8249;</span>
+              <span class="row-orb"></span>
+              <span class="row-title">${film.title || "Untitled"}</span>
+              <span class="row-date">${[film.year, film.duration].filter(Boolean).join("&nbsp;&nbsp;&nbsp;")}</span>
+              <span class="row-chev row-chev-r">&#8250;</span>
+            </li>`).join("")}
+        </ul>
+        <span class="tv-scroll tv-scroll-down">&#9660;</span>
+      </div>
+      <footer class="tv-status">Sorted by date&nbsp;&nbsp;(press SELECT / click to open)</footer>`;
+
+    root.querySelectorAll(".tivo-row").forEach((row) => {
+      row.addEventListener("mouseenter", () => { selected = +row.dataset.i; syncSelection(); });
+      row.addEventListener("click", () => { selected = +row.dataset.i; openDetail(selected); });
+    });
+    const sel = root.querySelector(".tivo-row.selected");
+    if (sel) sel.scrollIntoView({ block: "nearest" });
+  }
+
+  // Move the highlight without re-rendering the whole list (keeps it snappy)
+  function syncSelection() {
+    root.querySelectorAll(".tivo-row").forEach((r) => {
+      r.classList.toggle("selected", +r.dataset.i === selected);
+    });
+    const sel = root.querySelector(".tivo-row.selected");
+    if (sel) sel.scrollIntoView({ block: "nearest" });
+  }
+
+  // ----- DETAIL (program screen with Play button) -----
+  function openDetail(i) {
+    current = i; view = "detail";
+    const f = films[i] || {};
+    const thumb = media(f.thumb || f.cover || "");
+    root.className = "tivo view-detail";
+    root.innerHTML = `
+      <header class="tivo-header">
+        <button class="tivo-back" id="tivo-back">&#8249; Now Playing</button>
+        <span class="tivo-header-sub">${f.title || ""}</span>
+      </header>
+      <div class="tivo-detail">
+        <button class="detail-screen" id="detail-play" aria-label="Play ${f.title || ""}">
+          ${thumb ? `<img src="${thumb}" alt="" onerror="this.style.display='none'">` : ""}
+          <span class="preview-scan"></span>
+          <span class="play-badge"><span class="play-tri"></span></span>
+        </button>
+        <div class="detail-info">
+          <h2 class="detail-title">${f.title || "Untitled"}</h2>
+          <p class="detail-meta">${filmMeta(f)}</p>
+          <p class="detail-desc">${f.description || ""}</p>
+          <button class="tivo-btn" id="detail-play-btn"><span class="play-tri sm"></span> Play</button>
+        </div>
+      </div>`;
+    root.querySelector("#tivo-back").addEventListener("click", renderList);
+    root.querySelector("#detail-play").addEventListener("click", () => openPlayer(i));
+    root.querySelector("#detail-play-btn").addEventListener("click", () => openPlayer(i));
+  }
+
+  // ----- PLAYER (embedded video + transport) -----
+  function openPlayer(i) {
+    current = i; view = "player";
+    const f = films[i] || {};
+    root.className = "tivo view-player";
+    root.innerHTML = `
+      <header class="tivo-header">
+        <button class="tivo-back" id="tivo-back">&#8249; Back</button>
+        <span class="tivo-header-sub">${f.title || ""}</span>
+      </header>
+      <div class="tivo-player">
+        <div class="player-screen"><div id="film-mount"></div><span class="preview-scan"></span></div>
+        <div class="player-transport">
+          <button class="trans-btn" id="t-rew" aria-label="Rewind 10s">&#9194;</button>
+          <button class="trans-btn play" id="t-play" aria-label="Play / Pause">&#9199;</button>
+          <button class="trans-btn" id="t-ff" aria-label="Forward 10s">&#9193;</button>
+          <span class="trans-time" id="t-elapsed">0:00</span>
+          <div class="tivo-progress"><div class="tivo-progress-fill" id="t-fill"></div></div>
+          <span class="trans-time" id="t-total">${f.duration || ""}</span>
+        </div>
+        <p class="player-desc">${f.description || ""}</p>
+      </div>`;
+    root.querySelector("#tivo-back").addEventListener("click", () => { destroyPlayer(); openDetail(i); });
+    root.querySelector("#t-play").addEventListener("click", togglePlay);
+    root.querySelector("#t-rew").addEventListener("click", () => player && player.seek(-10));
+    root.querySelector("#t-ff").addEventListener("click", () => player && player.seek(10));
+
+    player = createFilmPlayer(document.getElementById("film-mount"), media, {
+      onState: (p) => { playing = p; updateTransport(); },
+      onProgress: (frac, pos, dur) => { progress = frac; posSec = pos; durSec = dur; updateProgress(); },
+      onEnded: () => { playing = false; updateTransport(); },
+    });
+    player.load(f);
+  }
+
+  function destroyPlayer() { if (player) { player.destroy(); player = null; } playing = false; }
+
+  function togglePlay() { if (player) playing ? player.pause() : player.play(); }
+
+  function updateTransport() {
+    const btn = root.querySelector("#t-play");
+    if (btn) btn.classList.toggle("is-playing", playing);
+  }
+  function updateProgress() {
+    const fill = root.querySelector("#t-fill");
+    const el = root.querySelector("#t-elapsed");
+    const tot = root.querySelector("#t-total");
+    if (fill) fill.style.width = (progress * 100).toFixed(1) + "%";
+    if (el && durSec) el.textContent = fmtTime(posSec);
+    if (tot && durSec) tot.textContent = fmtTime(durSec);
+  }
+
+  // ----- keyboard (remote) -----
+  document.addEventListener("keydown", (e) => {
+    if (view === "list") {
+      if (e.key === "ArrowUp")   { e.preventDefault(); selected = Math.max(0, selected - 1); syncSelection(); }
+      if (e.key === "ArrowDown") { e.preventDefault(); selected = Math.min(films.length - 1, selected + 1); syncSelection(); }
+      if (e.key === "Enter")     { openDetail(selected); }
+    } else if (view === "detail") {
+      if (e.key === "Enter")  { openPlayer(current); }
+      if (e.key === "Escape" || e.key === "Backspace") { renderList(); }
+    } else if (view === "player") {
+      if (e.key === " ")      { e.preventDefault(); togglePlay(); }
+      if (e.key === "ArrowLeft"  && player) player.seek(-10);
+      if (e.key === "ArrowRight" && player) player.seek(10);
+      if (e.key === "Escape" || e.key === "Backspace") { destroyPlayer(); openDetail(current); }
+    }
+  });
+
+  renderList();
+}
+
+// Embedded-video transport abstraction: YouTube IFrame API + Vimeo Player SDK
+function createFilmPlayer(mount, media, cb) {
+  let kind = null, yt = null, vimeo = null, vid = null, poll = null, dur = 0;
+
+  function startPoll(getPos) {
+    stopPoll();
+    poll = setInterval(() => {
+      Promise.resolve(getPos()).then((pos) => {
+        if (dur) cb.onProgress(Math.min(1, pos / dur), pos, dur);
+      });
+    }, 250);
+  }
+  function stopPoll() { if (poll) { clearInterval(poll); poll = null; } }
+
+  function load(film) {
+    // Self-hosted video file (e.g. R2-hosted .mp4 / .mov)
+    if (film.src) {
+      kind = "self";
+      vid = document.createElement("video");
+      vid.src = media(film.src);
+      vid.playsInline = true;
+      vid.preload = "metadata";
+      vid.addEventListener("loadedmetadata", () => { dur = vid.duration; });
+      vid.addEventListener("play", () => cb.onState(true));
+      vid.addEventListener("pause", () => cb.onState(false));
+      vid.addEventListener("ended", () => cb.onEnded());
+      vid.addEventListener("timeupdate", () => {
+        if (vid.duration) cb.onProgress(vid.currentTime / vid.duration, vid.currentTime, vid.duration);
+      });
+      mount.appendChild(vid);
+      vid.play().catch(() => {});
+      return;
     }
 
-    entry.innerHTML = `
-      <iframe src="${embedSrc}" allowfullscreen title="${film.title}"></iframe>
-      <h2 class="film-title">${film.title}</h2>
-      <p class="film-meta">${[film.year, film.duration, ...(film.tags || [])].filter(Boolean).join(" · ")}</p>
-      ${film.description ? `<p class="film-description">${film.description}</p>` : ""}
-    `;
+    const e = film.embed || {};
+    if (e.platform === "youtube") {
+      kind = "yt";
+      const div = document.createElement("div");
+      mount.appendChild(div);
+      ensureYT().then(() => {
+        yt = new YT.Player(div, {
+          videoId: e.id,
+          playerVars: { controls: 0, modestbranding: 1, rel: 0, playsinline: 1 },
+          events: {
+            onReady: (ev) => { dur = ev.target.getDuration(); ev.target.playVideo(); startPoll(() => yt.getCurrentTime()); },
+            onStateChange: (ev) => {
+              if (ev.data === YT.PlayerState.PLAYING) { dur = yt.getDuration() || dur; cb.onState(true); }
+              else if (ev.data === YT.PlayerState.PAUSED) cb.onState(false);
+              else if (ev.data === YT.PlayerState.ENDED) cb.onEnded();
+            },
+          },
+        });
+      });
+    } else if (e.platform === "vimeo") {
+      kind = "vimeo";
+      const div = document.createElement("div");
+      mount.appendChild(div);
+      ensureVimeo().then(() => {
+        vimeo = new Vimeo.Player(div, { id: e.id, controls: false, responsive: true });
+        vimeo.on("play", () => cb.onState(true));
+        vimeo.on("pause", () => cb.onState(false));
+        vimeo.on("ended", () => cb.onEnded());
+        vimeo.on("timeupdate", (d) => { dur = d.duration; cb.onProgress(d.percent, d.seconds, d.duration); });
+        vimeo.play().catch(() => {});
+      });
+    }
+  }
 
-    list.appendChild(entry);
+  function play()  { if (vid) vid.play().catch(() => {}); else if (yt) yt.playVideo(); else if (vimeo) vimeo.play().catch(() => {}); }
+  function pause() { if (vid) vid.pause(); else if (yt) yt.pauseVideo(); else if (vimeo) vimeo.pause().catch(() => {}); }
+  function seek(delta) {
+    if (vid) vid.currentTime = Math.max(0, Math.min(vid.duration || 1e9, vid.currentTime + delta));
+    else if (yt) yt.seekTo(Math.max(0, yt.getCurrentTime() + delta), true);
+    else if (vimeo) vimeo.getCurrentTime().then((t) => vimeo.setCurrentTime(Math.max(0, t + delta)));
+  }
+  function destroy() {
+    stopPoll();
+    if (vid) { vid.pause(); vid.removeAttribute("src"); vid.load(); }
+    if (yt && yt.destroy) yt.destroy();
+    if (vimeo && vimeo.destroy) vimeo.destroy();
+    yt = vimeo = vid = null; mount.innerHTML = "";
+  }
+
+  return { load, play, pause, seek, destroy };
+}
+
+let _ytReady, _vimeoReady;
+function ensureYT() {
+  if (_ytReady) return _ytReady;
+  _ytReady = new Promise((res) => {
+    if (window.YT && window.YT.Player) return res();
+    window.onYouTubeIframeAPIReady = () => res();
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(s);
   });
+  return _ytReady;
+}
+function ensureVimeo() {
+  if (_vimeoReady) return _vimeoReady;
+  _vimeoReady = new Promise((res) => {
+    if (window.Vimeo) return res();
+    const s = document.createElement("script");
+    s.src = "https://player.vimeo.com/api/player.js";
+    s.onload = () => res();
+    document.head.appendChild(s);
+  });
+  return _vimeoReady;
 }
 
 // ── Writing ───────────────────────────────────────────────────────────────────

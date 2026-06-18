@@ -152,38 +152,284 @@ img { display: block; max-width: 100%; height: auto; }
   margin-top: 0.2rem;
 }
 
-/* ── Film list ──────────────────────────────────────────────────────────── */
-.film-list {
+/* ══════════════════════════════════════════════════════════════════════════
+   FILM — DVR-guide UI (TiVo homage), scoped to body.film
+   ═════════════════════════════════════════════════════════════════════════ */
+
+body.film {
+  --tv-panel: rgba(255, 255, 255, 0.05);
+  --tv-line: rgba(255, 255, 255, 0.14);
+  --tv-text: #eef4f6;
+  --tv-muted: #aebfbb;
+  --tv-green: #6cc04a;
+  --tv-green-d: #3c8f33;
+  --tv-gold: #f0cb84;
+  --tv-purple-a: #9d92ec;
+  --tv-purple-b: #4a44b4;
+
+  padding: 0;
+  min-height: 100vh;
+  color: var(--tv-text);
+  /* Narrow / condensed type to match the broadcast guide */
+  font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", "Helvetica Neue", Arial, sans-serif;
+  /* Flat, matte teal → deep-green broadcast gradient (no glossy hotspot) */
+  background: linear-gradient(180deg, #379a82 0%, #20705e 30%, #124c40 58%, #0a3329 78%, #041d17 100%);
+}
+
+.film .tivo-home {
+  position: fixed;
+  top: 1rem; left: 1.1rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  z-index: 10;
+}
+.film .tivo-home:hover { color: #fff; }
+
+/* faint CRT scanline overlay on the whole guide */
+.film .tivo {
+  position: relative;
+  min-height: 100vh;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 56px 28px 28px;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
-  max-width: 800px;
 }
 
-.film-entry iframe {
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.film .tivo-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 0 6px 12px;
+  border-bottom: 2px solid var(--tv-green);
+  margin-bottom: 18px;
+}
+.film .tivo-mark {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tv-green);
+  letter-spacing: 0.01em;
+}
+.film .tivo-header-sub { font-size: 1.05rem; color: var(--tv-text); font-weight: 700; }
+.film .tivo-back {
+  background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 1.05rem; font-weight: 700;
+  color: var(--tv-green);
+}
+.film .tivo-back:hover { color: #fff; }
+
+/* ── List view — "Now Playing List" homage ──────────────────────────────── */
+.film .tv-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 96px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.film .tv-logo {
+  position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
+  width: 116px; height: auto; z-index: 2;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+.film .tv-title {
+  position: relative; z-index: 2;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  font-weight: 800;
+  color: var(--tv-gold);
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 #6b4f1e, 0 2px 7px rgba(0, 0, 0, 0.55);
+}
+
+/* Ghosted "mvua" watermark drifting in and out of focus */
+.film .tv-watermarks { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.film .tv-wm {
+  position: absolute;
+  font-weight: 800; letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+  will-change: opacity, filter, transform;
+}
+.film .tv-wm-1 { top: -22px; left: 18%; font-size: 8rem; animation: mvuaDrift1 19s ease-in-out infinite; }
+.film .tv-wm-2 { top: 2px;  right: 5%; font-size: 6rem; animation: mvuaDrift2 24s ease-in-out infinite 4s; }
+.film .tv-wm-3 { top: 26px; left: 48%; font-size: 5rem; animation: mvuaDrift3 29s ease-in-out infinite 9s; }
+@keyframes mvuaDrift1 {
+  0%   { opacity: 0.04; filter: blur(5px); transform: translate(0, 0); }
+  30%  { opacity: 0.12; filter: blur(1px); transform: translate(46px, 16px); }
+  60%  { opacity: 0.07; filter: blur(3px); transform: translate(-24px, 30px); }
+  100% { opacity: 0.04; filter: blur(5px); transform: translate(0, 0); }
+}
+@keyframes mvuaDrift2 {
+  0%   { opacity: 0.05; filter: blur(4px); transform: translate(0, 0); }
+  40%  { opacity: 0.11; filter: blur(0px); transform: translate(-40px, 22px); }
+  70%  { opacity: 0.06; filter: blur(3px); transform: translate(18px, -14px); }
+  100% { opacity: 0.05; filter: blur(4px); transform: translate(0, 0); }
+}
+@keyframes mvuaDrift3 {
+  0%   { opacity: 0.03; filter: blur(6px); transform: translate(0, 0); }
+  35%  { opacity: 0.10; filter: blur(1px); transform: translate(30px, -20px); }
+  65%  { opacity: 0.06; filter: blur(4px); transform: translate(-34px, -8px); }
+  100% { opacity: 0.03; filter: blur(6px); transform: translate(0, 0); }
+}
+
+/* Rounded list panel */
+.film .tv-panel {
+  position: relative;
+  flex: 1;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+  padding: 16px 18px;
+}
+.film .tv-scroll {
+  position: absolute; right: 16px;
+  color: rgba(255, 255, 255, 0.5); font-size: 0.85rem;
+}
+.film .tv-scroll-up { top: 5px; }
+.film .tv-scroll-down { bottom: 5px; }
+
+.film .tivo-list { list-style: none; max-height: 64vh; overflow-y: auto; }
+.film .tivo-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 30px;
+  border-radius: 26px;
+  cursor: pointer;
+  color: #ddefe8;
+}
+.film .row-orb {
+  width: 18px; height: 18px; border-radius: 50%; flex: 0 0 auto;
+  background: radial-gradient(circle at 42% 40%, #9ccb72 0%, #6aa843 60%, #3f7e2f 100%);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+.film .row-title {
+  flex: 1; font-size: 1.35rem; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+.film .row-date { font-size: 1.12rem; color: #d2e7de; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45); }
+.film .row-chev {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 1.7rem; font-weight: 700; color: #fff; opacity: 0; pointer-events: none;
+}
+.film .row-chev-l { left: 9px; }
+.film .row-chev-r { right: 9px; }
+
+/* Purple glossy selection pill with gold edge + chevrons */
+.film .tivo-row.selected {
+  color: #fff;
+  /* Flat matte purple — minimal gloss */
+  background: linear-gradient(180deg, #7d72d2 0%, #5950bd 60%, #4a44b4 100%);
+  border: 1px solid var(--tv-gold);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.film .tivo-row.selected .row-chev { opacity: 0.95; }
+.film .tivo-row.selected .row-date { color: #fff; }
+
+/* Bottom status bar */
+.film .tv-status {
+  margin-top: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--tv-gold);
+  font-size: 1rem; text-align: center; padding: 12px;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+/* Screens (detail & player) */
+.film .detail-screen,
+.film .player-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
   width: 100%;
-  aspect-ratio: 16/9;
-  border: none;
-  display: block;
+  background: #05080a;
+  border-radius: 10px;
+  border: 1px solid var(--tv-line);
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.film .detail-screen img { width: 100%; height: 100%; object-fit: cover; }
+.film .preview-scan {
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 3px);
 }
 
-.film-title {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: normal;
-  margin-top: 0.75rem;
+/* ── Detail view ────────────────────────────────────────────────────────── */
+.film .tivo-detail { display: grid; grid-template-columns: 1.4fr 1fr; gap: 26px; align-items: start; }
+.film .detail-screen { cursor: pointer; padding: 0; border: 1px solid var(--tv-line); }
+.film .play-badge {
+  position: absolute; width: 74px; height: 74px; border-radius: 50%;
+  background: rgba(108, 192, 74, 0.92);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
 }
-
-.film-meta {
-  font-size: 0.85rem;
-  color: var(--color-muted);
-  margin-top: 0.25rem;
+.film .play-tri {
+  width: 0; height: 0;
+  border-left: 22px solid #fff;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  margin-left: 6px;
 }
+.film .play-tri.sm { border-left-width: 11px; border-top-width: 7px; border-bottom-width: 7px; margin-left: 3px; }
+.film .detail-title { font-size: 1.5rem; font-weight: 700; }
+.film .detail-meta { font-size: 0.85rem; color: var(--tv-muted); margin: 6px 0 14px; }
+.film .detail-desc { font-size: 0.95rem; line-height: 1.65; color: #cdd9de; margin-bottom: 20px; }
 
-.film-description {
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-  line-height: 1.6;
+.film .tivo-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: linear-gradient(180deg, var(--tv-green), var(--tv-green-d));
+  border: 1px solid var(--tv-green-d);
+  color: #fff; font-family: inherit; font-weight: 700; font-size: 1rem;
+  padding: 9px 22px; border-radius: 999px; cursor: pointer;
+}
+.film .tivo-btn:hover { filter: brightness(1.08); }
+
+/* ── Player view ────────────────────────────────────────────────────────── */
+.film .tivo-player { max-width: 860px; margin: 0 auto; width: 100%; }
+.film .player-screen { background: #000; }
+.film .player-screen #film-mount,
+.film .player-screen iframe,
+.film .player-screen video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.film .player-screen #film-mount > div,
+.film .player-screen #film-mount iframe,
+.film .player-screen #film-mount video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+
+.film .player-transport {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 14px; padding: 12px 16px;
+  background: var(--tv-panel);
+  border: 1px solid var(--tv-line);
+  border-radius: 12px;
+}
+.film .trans-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--tv-text); font-size: 1.3rem; line-height: 1;
+  padding: 4px 6px;
+}
+.film .trans-btn:hover { color: var(--tv-green); }
+.film .trans-time { font-size: 0.82rem; color: var(--tv-muted); min-width: 38px; }
+.film .tivo-progress {
+  flex: 1; height: 9px; border-radius: 5px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--tv-line);
+  overflow: hidden;
+}
+.film .tivo-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(180deg, #8fe06a, var(--tv-green-d));
+}
+.film .player-desc { margin-top: 16px; font-size: 0.95rem; line-height: 1.65; color: #cdd9de; }
+
+@media (max-width: 720px) {
+  .film .tivo-body,
+  .film .tivo-detail { grid-template-columns: 1fr; }
 }
 
 /* ── Writing list ───────────────────────────────────────────────────────── */
