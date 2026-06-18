@@ -15,84 +15,77 @@
     {
       "label": "photography",
       "href": "photography/",
-      "img": "nav-images/photography.png"
+      "img": "nav-images/photography.jpg"
     },
     {
       "label": "film",
       "href": "film/",
-      "img": "nav-images/film.png"
+      "img": "nav-images/film.jpg"
     },
     {
       "label": "writing",
       "href": "writing/",
-      "img": "nav-images/writing.png"
+      "img": "nav-images/writing.jpg"
     },
     {
       "label": "audio",
       "href": "audio/",
-      "img": "nav-images/audio.png"
+      "img": "audio/jake_the_dog_headphone.JPG"
     },
     {
       "label": "about",
       "href": "about/",
-      "img": "nav-images/about.png"
+      "img": "nav-images/about.jpg"
     }
   ],
 
   "photography": [
     {
-      "id": "example-project",
-      "title": "Example Project",
+      "id": "lost-in-the-field",
+      "title": "Lost in The Field",
       "year": 2024,
-      "tags": ["35mm", "portrait"],
-      "cover": "images/example-project/cover.jpg",
-      "thumb": "thumbnails/example-project/cover.webp",
+      "thumb": "photography/lost_in_the_field/in_the_field_0.JPG",
       "photos": [
-        {
-          "src": "images/example-project/01.jpg",
-          "thumb": "thumbnails/example-project/01.webp",
-          "alt": "Description of the photo"
-        }
+        { "src": "photography/lost_in_the_field/in_the_field_0.JPG", "title": "in the field", "caption": "shot on Sony a7iii, May, 2024" },
+        { "src": "photography/lost_in_the_field/in_the_field_1.JPG", "title": "in the woods", "caption": "shot on Sony a7iii, May, 2024" },
+        { "src": "photography/lost_in_the_field/in_the_field_2.JPG", "title": "in the arena", "caption": "shot on Sony a7iii, May, 2024" },
+        { "src": "photography/lost_in_the_field/in_the_field_3.JPG", "title": "in the park", "caption": "shot on Sony a7iii, May, 2024" }
+      ]
+    },
+    {
+      "id": "qmul-skate",
+      "title": "Queen Mary Skate",
+      "year": 2024,
+      "photos": [
+        { "src": "photography/QMUL_Skate/qmul_skate_0.jpg", "title": "", "caption": "shot on Sony a7iii, October, 2024" },
+        { "src": "photography/QMUL_Skate/qmul_skate_1.jpg", "title": "", "caption": "shot on Sony a7iii, October, 2024" },
+        { "src": "photography/QMUL_Skate/qmul_skate_2.jpg", "title": "", "caption": "shot on Sony a7iii, October, 2024" }
       ]
     }
   ],
 
   "film": [
     {
-      "id": "example-film",
-      "title": "Example Film",
+      "id": "sintra",
+      "title": "sintra.mov",
       "year": 2024,
-      "duration": "6:32",
-      "tags": ["documentary"],
+      "duration": "0:55",
+      "tags": ["travel vlog"],
       "thumb": "images/film/example-film-thumb.jpg",
-      "embed": {
-        "platform": "vimeo",
-        "id": "123456789"
-      },
-      "description": "A short paragraph about the work."
+      "src": "film/sintra.mov",
+      "description": "A short video in Sintra's castle"
     }
   ],
 
   "audio": [
     {
-      "id": "example-soundcloud",
-      "title": "Example Track",
+      "id": "live_dupe",
+      "title": "live_dupe (6_9_2026).wav",
       "year": 2024,
-      "duration": "3:42",
+      "duration": "1:47",
       "tags": ["music"],
-      "embed": {
-        "platform": "soundcloud",
-        "id": "YOUR_SOUNDCLOUD_TRACK_ID"
-      },
-      "description": "A short note about the piece."
-    },
-    {
-      "id": "example-local",
-      "title": "Example Field Recording",
-      "year": 2024,
-      "tags": ["field recording", "ambient"],
-      "src": "audio/example-field-recording.mp3",
-      "description": "Self-hosted audio — drop the file in your R2 bucket under audio/."
+      "src": "audio/live_dupe (6_9_2026).wav",
+      "description": "liv.e dupe :P"
     }
   ],
 

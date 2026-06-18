@@ -246,51 +246,236 @@ body.writing-piece .piece-body p {
   font-size: 0.85rem;
 }
 
-/* ── Audio list ─────────────────────────────────────────────────────────── */
-.audio-list {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  max-width: 800px;
+/* ══════════════════════════════════════════════════════════════════════════
+   AUDIO — 2000s iPod UI (scoped to body.audio)
+   ═════════════════════════════════════════════════════════════════════════ */
+
+body.audio {
+  --ipod-body: #f4f5f7;
+  --ipod-edge: #c9ccd2;
+  --ipod-screen-bg: #e9ece6;
+  --ipod-sel-a: #2f72d6;
+  --ipod-sel-b: #6aa6f0;
+  --ipod-text: #1a1a1a;
+  --ipod-muted: #6a6f78;
+
+  padding: 0;
+  color: var(--ipod-text);
+  font-family: "Helvetica Neue", Helvetica, Arial, "Segoe UI", system-ui, sans-serif;
+  background: linear-gradient(180deg, #15171a 0%, #181c1a 55%, #0e1f16 100%);
+  min-height: 100vh;
 }
 
-.audio-entry {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.audio-embed {
-  width: 100%;
-  height: 166px;
-  border: none;
+/* Full-screen reactive equalizer behind everything */
+.audio .eq-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
   display: block;
+  z-index: 0;
 }
 
-.audio-embed--bandcamp {
-  height: 120px;
-}
-
-.audio-player {
-  width: 100%;
-  display: block;
-}
-
-.audio-title {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: normal;
-  margin-top: 0.25rem;
-}
-
-.audio-meta {
+.audio .ipod-home {
+  position: fixed;
+  top: 1.25rem;
+  left: 1.25rem;
   font-size: 0.85rem;
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  z-index: 5;
+}
+.audio .ipod-home:hover { color: #fff; }
+
+.audio .ipod-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
 }
 
-.audio-description {
-  font-size: 0.9rem;
-  line-height: 1.6;
+/* ── Device body ────────────────────────────────────────────────────────── */
+.audio .ipod {
+  width: 300px;
+  padding: 22px 22px 26px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #313337 0%, #1a1b1e 58%, #0c0d0f 100%);
+  border: 1px solid #000;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 18px 44px rgba(0, 0, 0, 0.55),
+    0 3px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Screen ─────────────────────────────────────────────────────────────── */
+.audio .ipod-screen-bezel {
+  background: #0f1112;
+  border-radius: 6px;
+  padding: 7px;
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.6), inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 24px;
+}
+
+.audio .ipod-screen {
+  height: 220px;
+  background: var(--ipod-screen-bg);
+  border-radius: 2px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.audio .screen-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: 20px;
+  flex: 0 0 auto;
+  background: linear-gradient(180deg, #dfe3dc 0%, #c3c8be 100%);
+  border-bottom: 1px solid #9aa093;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c2f29;
+}
+.audio .tb-battery {
+  position: absolute;
+  right: 5px;
+  width: 16px; height: 9px;
+  border: 1px solid #5b5f57;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #6fae3a 70%, transparent 70%);
+}
+.audio .tb-battery::after {
+  content: "";
+  position: absolute;
+  right: -3px; top: 2px;
+  width: 2px; height: 3px;
+  background: #5b5f57;
+}
+
+/* ── Menu list ──────────────────────────────────────────────────────────── */
+.audio .screen-list {
+  list-style: none;
+  margin: 0; padding: 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+.audio .screen-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 7px;
+  border-bottom: 1px solid #d7dacf;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.audio .row-label { overflow: hidden; text-overflow: ellipsis; }
+.audio .row-chevron { color: #8a8f82; font-weight: 700; padding-left: 6px; }
+.audio .screen-row.selected {
+  background: linear-gradient(180deg, var(--ipod-sel-b) 0%, var(--ipod-sel-a) 100%);
+  color: #fff;
+  border-bottom-color: var(--ipod-sel-a);
+}
+.audio .screen-row.selected .row-chevron { color: #fff; }
+
+/* ── Now playing ────────────────────────────────────────────────────────── */
+.audio .now-body {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  align-items: center;
+}
+.audio .now-art {
+  width: 84px; height: 84px;
+  flex: 0 0 auto;
+  background: #fff;
+  border: 1px solid #b7bbb0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.audio .now-art img { width: 100%; height: 100%; object-fit: cover; }
+.audio .now-meta { min-width: 0; }
+.audio .now-count { font-size: 11px; color: var(--ipod-muted); margin-bottom: 3px; }
+.audio .now-title {
+  font-weight: 700; font-size: 14px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.audio .now-sub {
+  font-size: 12px; color: #3c4039;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.audio .note-icon { opacity: 0.8; }
+
+.audio .now-progress {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 10px 12px;
+}
+.audio .now-time { font-size: 11px; color: var(--ipod-muted); min-width: 30px; }
+.audio .now-remaining { text-align: right; }
+.audio .now-bar {
+  flex: 1 1 auto;
+  height: 7px;
+  background: #fff;
+  border: 1px solid #9aa093;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.audio .now-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(180deg, #8fbef0 0%, #3f86dd 100%);
+}
+
+/* ── Click wheel ────────────────────────────────────────────────────────── */
+.audio .ipod-wheel {
+  position: relative;
+  width: 220px; height: 220px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #3c3e42 0%, #2a2c2f 60%, #1d1f21 100%);
+  border: 1px solid #000;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.14), inset 0 -2px 7px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0,0,0,0.5);
+}
+.audio .wheel-label {
+  position: absolute;
+  background: none; border: none;
+  color: #b9bcc2;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  user-select: none;
+}
+.audio .wheel-label:hover { color: #fff; }
+.audio .wheel-label:active { color: #8b8e94; }
+.audio .wheel-menu { top: 14px; left: 50%; transform: translateX(-50%); }
+.audio .wheel-prev { left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+.audio .wheel-next { right: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+.audio .wheel-play { bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 18px; }
+
+.audio .wheel-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 78px; height: 78px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 38%, #46484c 0%, #303236 70%, #232528 100%);
+  border: 1px solid #000;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 0 1px 3px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+.audio .wheel-center:active { box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5); }
+
+@media (max-width: 360px) {
+  .audio .ipod { width: 270px; }
+  .audio .ipod-wheel { width: 200px; height: 200px; }
 }
 
 /* ── About ──────────────────────────────────────────────────────────────── */
@@ -379,3 +564,339 @@ body.writing-piece .piece-body p {
 
 /* ── Utility ────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PHOTOGRAPHY — "old windows software ui" aesthetic
+   Scoped entirely to body.photography so other sections keep their clean look.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* Retro bitmap UI font (classic MS Sans Serif, from the open-source 98.css project) */
+@font-face {
+  font-family: "MS Sans Serif Web";
+  src: url("../fonts/ms_sans_serif.woff2") format("woff2"),
+       url("../fonts/ms_sans_serif.woff") format("woff");
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "MS Sans Serif Web";
+  src: url("../fonts/ms_sans_serif_bold.woff2") format("woff2"),
+       url("../fonts/ms_sans_serif_bold.woff") format("woff");
+  font-weight: bold;
+  font-display: swap;
+}
+
+body.photography {
+  --win-face: #c0c0c0;       /* classic grey window face            */
+  --win-light: #ffffff;      /* top/left highlight                  */
+  --win-soft: #dfdfdf;       /* inner highlight                    */
+  --win-shadow: #808080;     /* inner shadow                       */
+  --win-dark: #404040;       /* outer shadow                       */
+  --win-title-a: #000080;    /* active title bar (navy)            */
+  --win-title-b: #1084d0;    /* active title bar gradient end      */
+  --win-desktop: #3a6ea5;    /* fallback desktop colour (XP blue)  */
+  --win-font: "MS Sans Serif Web", Tahoma, "MS Sans Serif", Geneva, sans-serif;
+
+  padding: 0;
+  /* Desktop wallpaper — drop your image at assets/ui/bliss.jpg */
+  background: var(--win-desktop) url("../ui/bliss.jpg") center center / cover no-repeat fixed;
+  color: #000;
+  font-family: var(--win-font);
+  font-size: 12px;
+}
+
+body.photography .win-titlebar,
+body.photography .win-titlebar-text,
+body.photography .win-btn,
+body.photography .win-button,
+body.photography .app-titlebar,
+body.photography .series-meta,
+body.photography .photo-caption,
+body.photography .win-statusbar { font-family: var(--win-font); }
+
+body.photography .desktop {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Reusable window chrome ─────────────────────────────────────────────── */
+.photography .win-window {
+  background: var(--win-face);
+  border: 2px solid;
+  border-color: var(--win-soft) var(--win-dark) var(--win-dark) var(--win-soft);
+  box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-shadow);
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.photography .win-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 2px 0 3px;
+  background: linear-gradient(90deg, var(--win-title-a), var(--win-title-b));
+  color: #fff;
+  font-weight: bold;
+  font-size: 11px;
+  user-select: none;
+}
+
+.photography .win-titlebar-icon { display: flex; align-items: center; }
+
+.photography .win-titlebar-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photography .win-titlebar-buttons {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.photography .win-btn {
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--win-face);
+  border: 1px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-soft), inset -1px -1px 0 var(--win-shadow);
+  color: #000;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.photography .win-btn:active {
+  border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+  box-shadow: inset 1px 1px 0 var(--win-shadow);
+}
+
+.photography .win-body { padding: 8px; }
+
+/* Raised, clickable push button (OK / Back / Prev / Next) */
+.photography .win-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 3px 10px;
+  background: var(--win-face);
+  border: 2px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-soft), inset -1px -1px 0 var(--win-shadow);
+  color: #000;
+  font: inherit;
+  font-size: 11px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.photography .win-button:active {
+  border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+  box-shadow: inset 1px 1px 0 var(--win-shadow);
+}
+
+/* ── App title bar (top of page) ────────────────────────────────────────── */
+.photography .app-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 3px;
+  background: linear-gradient(90deg, var(--win-title-a), var(--win-title-b));
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  border-bottom: 2px solid var(--win-dark);
+}
+
+.photography .app-titlebar-icon { display: flex; align-items: center; }
+.photography .app-titlebar-text { white-space: nowrap; }
+.photography .app-titlebar-buttons { margin-left: auto; }
+
+.photography .desktop-area {
+  flex: 1;
+  padding: 20px;
+}
+
+/* ── Series grid (main view) — 5 windows per row ────────────────────────── */
+.photography .series-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.photography .series-window { cursor: pointer; transition: filter 0.1s; }
+.photography .series-window:hover { filter: brightness(1.03); }
+.photography .series-window:active { box-shadow: inset 1px 1px 0 var(--win-shadow); }
+
+/* Sunken inset image well */
+.photography .img-placeholder {
+  aspect-ratio: 4 / 3;
+  background: #fff;
+  border: 2px solid;
+  border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+  box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photography .img-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photography .ph-icon { opacity: 0.85; }
+
+.photography .series-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #000;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--win-shadow);
+  box-shadow: inset 1px 1px 0 var(--win-dark);
+  padding: 2px 4px;
+}
+
+/* ── Series subpage ─────────────────────────────────────────────────────── */
+.photography .series-toolbar { margin-bottom: 18px; }
+
+.photography .win-toolbar-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.photography .win-toolbar-meta { font-size: 11px; color: var(--win-dark); }
+
+/* Full-width vertical stack: one image per screen, scroll to the next */
+.photography .photo-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* centre frames that are narrower than the screen */
+  gap: 28px;
+}
+
+/* Each window shrink-wraps its image so the frame hugs it — no letterboxing.
+   A portrait image therefore produces a narrower window. */
+.photography .photo-window {
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* Blank slots have no image to size to, so keep a full-width frame. */
+.photography .photo-window:has(.img-placeholder:not(:has(img))) {
+  width: 100%;
+}
+
+/* Tight reveal between the image and the window border */
+.photography .photo-window .win-body { padding: 4px; }
+
+.photography .photo-window .img-placeholder {
+  cursor: pointer;
+  aspect-ratio: auto;
+  width: auto;
+  max-width: 100%;
+}
+
+/* Image grows to the full width but never taller than one screen, preserving
+   aspect ratio. max-height on a replaced element keeps width proportional,
+   so the hugging frame narrows for tall/portrait shots. */
+.photography .photo-window .img-placeholder img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 82vh;
+}
+
+/* Blank slots reserve roughly a screenful so each image is its own scroll stop */
+.photography .photo-window .img-placeholder:not(:has(img)) {
+  width: 100%;
+  min-height: 78vh;
+}
+
+.photography .photo-caption {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #000;
+  background: #fff;
+  border: 1px solid var(--win-shadow);
+  box-shadow: inset 1px 1px 0 var(--win-dark);
+  padding: 3px 5px;
+  min-height: 1.4em;
+}
+
+/* ── Windows-framed lightbox ────────────────────────────────────────────── */
+.photography .win-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.photography .win-lightbox[hidden] { display: none; }
+
+.photography .win-lightbox-window {
+  width: min(640px, 92vw);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5),
+    inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-shadow);
+}
+
+.photography .win-lightbox-img {
+  aspect-ratio: auto;
+  max-height: 64vh;
+  min-height: 200px;
+}
+
+.photography .win-lightbox-img img {
+  width: 100%;
+  height: 100%;
+  max-height: 64vh;
+  object-fit: contain;
+  background: #000;
+}
+
+/* Status bar (bottom of lightbox) */
+.photography .win-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 4px 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+  background: var(--win-face);
+  border: 1px solid;
+  border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
+}
+
+.photography .win-statusbar-nav { display: flex; gap: 6px; }
+
+/* ── Responsive — fewer columns on smaller screens ──────────────────────── */
+@media (max-width: 820px) {
+  .photography .series-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .photography .series-grid { grid-template-columns: 1fr; }
+}

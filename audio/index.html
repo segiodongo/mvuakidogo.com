@@ -8,18 +8,35 @@
 </head>
 <body class="audio">
 
-  <header class="page-header">
-    <a href="../" class="back-link">← home</a>
-    <h1>Audio</h1>
-  </header>
+  <!-- Reactive LED equalizer backdrop -->
+  <canvas class="eq-canvas" id="eq-canvas" aria-hidden="true"></canvas>
 
-  <main>
-    <div class="tag-filters" role="group" aria-label="Filter by tag"></div>
-    <div class="audio-list">
-      <!-- Audio entries populated by JS from content.json -->
+  <a href="../" class="ipod-home">← home</a>
+
+  <div class="ipod-stage">
+    <div class="ipod" id="ipod">
+      <div class="ipod-screen-bezel">
+        <div class="ipod-screen" id="ipod-screen">
+          <!-- Menu / Now-Playing populated by JS -->
+        </div>
+      </div>
+
+      <div class="ipod-wheel">
+        <button class="wheel-label wheel-menu" id="wheel-menu">MENU</button>
+        <button class="wheel-label wheel-prev" id="wheel-prev" aria-label="Previous">&#9198;</button>
+        <button class="wheel-label wheel-next" id="wheel-next" aria-label="Next">&#9197;</button>
+        <button class="wheel-label wheel-play" id="wheel-play" aria-label="Play / Pause">&#9199;</button>
+        <button class="wheel-center" id="wheel-center" aria-label="Select"></button>
+      </div>
     </div>
-  </main>
+  </div>
 
+  <!-- Self-hosted playback engine.
+       crossorigin enables Web Audio analysis of R2 files (bucket must send CORS). -->
+  <audio id="ipod-audio" preload="none" crossorigin="anonymous"></audio>
+
+  <!-- SoundCloud Widget API (controls embedded tracks) -->
+  <script src="https://w.soundcloud.com/player/api.js"></script>
   <script src="../assets/js/gallery.js"></script>
   <script>
     initGallery({ section: "audio", contentPath: "../content.json" });
