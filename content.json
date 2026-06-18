@@ -1,0 +1,109 @@
+{
+  "mediaBase": "",
+
+  "site": {
+    "name": "Your Name",
+    "tagline": "photographer & filmmaker based in Chicago",
+    "bio": "A paragraph about you for the about page.",
+    "contact": {
+      "email": "you@example.com",
+      "instagram": "@yourhandle"
+    }
+  },
+
+  "nav": [
+    {
+      "label": "photography",
+      "href": "photography/",
+      "img": "nav-images/photography.png"
+    },
+    {
+      "label": "film",
+      "href": "film/",
+      "img": "nav-images/film.png"
+    },
+    {
+      "label": "writing",
+      "href": "writing/",
+      "img": "nav-images/writing.png"
+    },
+    {
+      "label": "audio",
+      "href": "audio/",
+      "img": "nav-images/audio.png"
+    },
+    {
+      "label": "about",
+      "href": "about/",
+      "img": "nav-images/about.png"
+    }
+  ],
+
+  "photography": [
+    {
+      "id": "example-project",
+      "title": "Example Project",
+      "year": 2024,
+      "tags": ["35mm", "portrait"],
+      "cover": "images/example-project/cover.jpg",
+      "thumb": "thumbnails/example-project/cover.webp",
+      "photos": [
+        {
+          "src": "images/example-project/01.jpg",
+          "thumb": "thumbnails/example-project/01.webp",
+          "alt": "Description of the photo"
+        }
+      ]
+    }
+  ],
+
+  "film": [
+    {
+      "id": "example-film",
+      "title": "Example Film",
+      "year": 2024,
+      "duration": "6:32",
+      "tags": ["documentary"],
+      "thumb": "images/film/example-film-thumb.jpg",
+      "embed": {
+        "platform": "vimeo",
+        "id": "123456789"
+      },
+      "description": "A short paragraph about the work."
+    }
+  ],
+
+  "audio": [
+    {
+      "id": "example-soundcloud",
+      "title": "Example Track",
+      "year": 2024,
+      "duration": "3:42",
+      "tags": ["music"],
+      "embed": {
+        "platform": "soundcloud",
+        "id": "YOUR_SOUNDCLOUD_TRACK_ID"
+      },
+      "description": "A short note about the piece."
+    },
+    {
+      "id": "example-local",
+      "title": "Example Field Recording",
+      "year": 2024,
+      "tags": ["field recording", "ambient"],
+      "src": "audio/example-field-recording.mp3",
+      "description": "Self-hosted audio — drop the file in your R2 bucket under audio/."
+    }
+  ],
+
+  "writing": [
+    {
+      "id": "example-piece",
+      "title": "Example Piece",
+      "year": 2024,
+      "tags": ["fiction"],
+      "excerpt": "The first line or two of the piece, shown in the index listing.",
+      "content": "writing/example-piece.md"
+    }
+  ]
+}

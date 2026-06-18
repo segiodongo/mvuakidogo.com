@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing — Your Name</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="writing">
+
+  <header class="page-header">
+    <a href="../" class="back-link">← home</a>
+    <h1>Writing</h1>
+  </header>
+
+  <main>
+    <div class="tag-filters" aria-label="Filter by tag">
+      <!-- Tags populated by JS -->
+    </div>
+    <ul class="writing-list">
+      <!-- Writing entries populated by JS from content.json -->
+    </ul>
+  </main>
+
+  <script src="../assets/js/gallery.js"></script>
+  <script>
+    initGallery({ section: "writing", contentPath: "../content.json" });
+  </script>
+</body>
+</html>

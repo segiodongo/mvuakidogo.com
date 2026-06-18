@@ -1,0 +1,381 @@
+/* ── Fonts ──────────────────────────────────────────────────────────────────
+   Add your @font-face declarations here once you have .woff2 files.
+   Example:
+   @font-face {
+     font-family: "YourDisplayFont";
+     src: url("../fonts/your-font.woff2") format("woff2");
+     font-weight: normal;
+     font-display: swap;
+   }
+*/
+
+/* ── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Custom properties ──────────────────────────────────────────────────── */
+:root {
+  --font-display: serif;          /* swap in your display font name */
+  --font-body: system-ui, sans-serif;
+  --color-bg: #fff;
+  --color-text: #111;
+  --color-muted: #666;
+  --color-border: #e0e0e0;
+  --max-width: 1100px;
+  --gap: 1.5rem;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+a { color: inherit; }
+img { display: block; max-width: 100%; height: auto; }
+
+/* ── Site header (homepage) ─────────────────────────────────────────────── */
+.site-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.site-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: normal;
+  letter-spacing: -0.02em;
+}
+
+.site-tagline {
+  color: var(--color-muted);
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* ── Nav grid (homepage image buttons) ─────────────────────────────────── */
+.nav-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  justify-content: center;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.nav-grid a {
+  display: block;
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.nav-grid a:hover { transform: scale(1.04); opacity: 0.9; }
+
+.nav-grid img {
+  width: 200px;       /* adjust to suit your nav image dimensions */
+  height: auto;
+}
+
+/* ── Page header (inner pages) ──────────────────────────────────────────── */
+.page-header {
+  margin-bottom: 2.5rem;
+}
+
+.page-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: normal;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  text-decoration: none;
+  margin-bottom: 1rem;
+}
+
+.back-link:hover { color: var(--color-text); }
+
+/* ── Tag filters ────────────────────────────────────────────────────────── */
+.tag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.tag-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.tag-btn:hover,
+.tag-btn.active { background: var(--color-text); color: var(--color-bg); border-color: var(--color-text); }
+
+/* ── Photography gallery grid ───────────────────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--gap);
+}
+
+.gallery-card {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.gallery-card img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+.gallery-card-title {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.gallery-card-meta {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-top: 0.2rem;
+}
+
+/* ── Film list ──────────────────────────────────────────────────────────── */
+.film-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  max-width: 800px;
+}
+
+.film-entry iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  display: block;
+}
+
+.film-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-top: 0.75rem;
+}
+
+.film-meta {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-top: 0.25rem;
+}
+
+.film-description {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+/* ── Writing list ───────────────────────────────────────────────────────── */
+.writing-list {
+  list-style: none;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.writing-entry a {
+  text-decoration: none;
+}
+
+.writing-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: normal;
+}
+
+.writing-meta {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-top: 0.2rem;
+}
+
+.writing-excerpt {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin-top: 0.4rem;
+  line-height: 1.6;
+}
+
+/* ── Writing piece (reader) ─────────────────────────────────────────────── */
+.piece-body {
+  max-width: 640px;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.piece-body p { margin-bottom: 1.2em; }
+.piece-body h2 { font-family: var(--font-display); font-weight: normal; margin: 2em 0 0.5em; }
+
+/* Poetry: preserve line breaks */
+body.writing-piece .piece-body p {
+  white-space: pre-line;
+}
+
+.piece-meta {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-top: 0.4rem;
+}
+
+.piece-footer {
+  margin-top: 3rem;
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+}
+
+/* ── Audio list ─────────────────────────────────────────────────────────── */
+.audio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  max-width: 800px;
+}
+
+.audio-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.audio-embed {
+  width: 100%;
+  height: 166px;
+  border: none;
+  display: block;
+}
+
+.audio-embed--bandcamp {
+  height: 120px;
+}
+
+.audio-player {
+  width: 100%;
+  display: block;
+}
+
+.audio-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-top: 0.25rem;
+}
+
+.audio-meta {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.audio-description {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ── About ──────────────────────────────────────────────────────────────── */
+.about-body {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.about-bio { line-height: 1.8; }
+
+.about-contact h2 {
+  font-family: var(--font-display);
+  font-weight: normal;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.about-contact ul {
+  list-style: none;
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+/* ── Lightbox ───────────────────────────────────────────────────────────── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.lightbox[hidden] { display: none; }
+
+.lightbox-figure {
+  max-width: 90vw;
+  max-height: 90vh;
+  text-align: center;
+}
+
+.lightbox-figure img {
+  max-width: 90vw;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.lightbox-figure figcaption {
+  color: #ccc;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.lightbox-close,
+.lightbox-prev,
+.lightbox-next {
+  position: absolute;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.lightbox-close { top: 1rem; right: 1rem; }
+.lightbox-prev  { left: 1rem;  top: 50%; transform: translateY(-50%); }
+.lightbox-next  { right: 1rem; top: 50%; transform: translateY(-50%); }
+
+.lightbox-close:hover,
+.lightbox-prev:hover,
+.lightbox-next:hover { opacity: 1; }
+
+/* ── Site footer ────────────────────────────────────────────────────────── */
+.site-footer {
+  text-align: center;
+  margin-top: 4rem;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+/* ── Utility ────────────────────────────────────────────────────────────── */
+.hidden { display: none !important; }

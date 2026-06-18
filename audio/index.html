@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio — Your Name</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="audio">
+
+  <header class="page-header">
+    <a href="../" class="back-link">← home</a>
+    <h1>Audio</h1>
+  </header>
+
+  <main>
+    <div class="tag-filters" role="group" aria-label="Filter by tag"></div>
+    <div class="audio-list">
+      <!-- Audio entries populated by JS from content.json -->
+    </div>
+  </main>
+
+  <script src="../assets/js/gallery.js"></script>
+  <script>
+    initGallery({ section: "audio", contentPath: "../content.json" });
+  </script>
+</body>
+</html>

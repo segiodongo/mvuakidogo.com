@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Writing — Your Name</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="writing writing-piece">
+
+  <header class="page-header">
+    <a href="./" class="back-link">← writing</a>
+    <h1 id="piece-title"></h1>
+    <p class="piece-meta" id="piece-meta"></p>
+  </header>
+
+  <main>
+    <article class="piece-body" id="piece-body">
+      <!-- Markdown rendered here by JS -->
+    </article>
+
+    <div class="piece-footer">
+      <a href="./" class="back-link">← back to writing</a>
+      <a href="" class="download-link" id="download-link" hidden>Download PDF</a>
+    </div>
+  </main>
+
+  <!-- marked.js converts .md files to HTML in the browser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="../assets/js/piece.js"></script>
+</body>
+</html>

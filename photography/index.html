@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photography — Your Name</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="photography">
+
+  <header class="page-header">
+    <a href="../" class="back-link">← home</a>
+    <h1>Photography</h1>
+  </header>
+
+  <main>
+    <div class="tag-filters" aria-label="Filter by tag">
+      <!-- Tags populated by JS -->
+    </div>
+    <div class="gallery-grid">
+      <!-- Project cards populated by JS from content.json -->
+    </div>
+  </main>
+
+  <!-- Lightbox overlay -->
+  <div class="lightbox" id="lightbox" hidden aria-modal="true" role="dialog">
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <button class="lightbox-prev" aria-label="Previous">‹</button>
+    <button class="lightbox-next" aria-label="Next">›</button>
+    <figure class="lightbox-figure">
+      <img src="" alt="" id="lightbox-img">
+      <figcaption id="lightbox-caption"></figcaption>
+    </figure>
+  </div>
+
+  <script src="../assets/js/gallery.js"></script>
+  <script src="../assets/js/lightbox.js"></script>
+  <script>
+    initGallery({ section: "photography", contentPath: "../content.json" });
+  </script>
+</body>
+</html>

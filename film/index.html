@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Film — Your Name</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="film">
+
+  <header class="page-header">
+    <a href="../" class="back-link">← home</a>
+    <h1>Film</h1>
+  </header>
+
+  <main>
+    <div class="film-list">
+      <!-- Film entries populated by JS from content.json -->
+    </div>
+  </main>
+
+  <script src="../assets/js/gallery.js"></script>
+  <script>
+    initGallery({ section: "film", contentPath: "../content.json" });
+  </script>
+</body>
+</html>
