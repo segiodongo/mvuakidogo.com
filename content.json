@@ -79,13 +79,49 @@
 
   "audio": [
     {
-      "id": "live_dupe",
-      "title": "live_dupe (6_9_2026).wav",
-      "year": 2024,
-      "duration": "1:47",
-      "tags": ["music"],
-      "src": "audio/live_dupe (6_9_2026).wav",
-      "description": "liv.e dupe :P"
+      "title": "Mixes",
+      "items": [
+        {
+          "id": "juke_jam_(10_20_2024)",
+          "title": "juke_jam_(10_20_2024).wav",
+          "year": 2024,
+          "duration": "16:14",
+          "artist": "DJ Mvua",
+          "album": "",
+          "tags": ["mixes"],
+          "src": "audio/juke_jam_(10_20_2024).wav",
+          "description": "juke juke juke juke juke juke juke juke !"
+        }
+      ]
+    },
+    {
+      "title": "Field Recordings",
+      "items": []
+    },
+    {
+      "title": "Music",
+      "items": [
+        {
+          "title": "Electronic",
+          "items": [
+            {
+              "id": "live_dupe",
+              "title": "live_dupe (6_9_2026).wav",
+              "year": 2024,
+              "duration": "1:47",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/live_dupe (6_9_2026).wav",
+              "description": "liv.e dupe :P"
+            }
+          ]
+        },
+        {
+          "title": "Ambient",
+          "items": []
+        }
+      ]
     }
   ],
 

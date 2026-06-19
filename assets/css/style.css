@@ -623,6 +623,14 @@ body.audio {
 }
 .audio .row-label { overflow: hidden; text-overflow: ellipsis; }
 .audio .row-chevron { color: #8a8f82; font-weight: 700; padding-left: 6px; }
+.audio .row-note { color: #8a8f82; padding-left: 6px; font-size: 12px; }
+.audio .screen-row.selected .row-note { color: #fff; }
+.audio .screen-empty {
+  padding: 14px 7px;
+  color: #8a8f82;
+  font-style: italic;
+  text-align: center;
+}
 .audio .screen-row.selected {
   background: linear-gradient(180deg, var(--ipod-sel-b) 0%, var(--ipod-sel-a) 100%);
   color: #fff;

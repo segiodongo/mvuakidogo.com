@@ -598,17 +598,21 @@ function makeWritingEntry(piece) {
 
 // ── Audio — 2000s iPod UI ─────────────────────────────────────────────────────
 
-function renderAudio(tracks, media) {
+function renderAudio(rootItems, media) {
   const screen = document.getElementById("ipod-screen");
   const audioEl = document.getElementById("ipod-audio");
 
   // ----- state -----
-  let view = "menu";       // "menu" | "now"
-  let selected = 0;        // highlighted row in the menu
-  let current = -1;        // track that is loaded/playing
+  let view = "menu";                         // "menu" | "now"
+  // Navigation stack of menus. Each: { title, items, selected }
+  const stack = [{ title: "iPod", items: rootItems || [], selected: 0 }];
+  let queue = [];                            // playable tracks for next/prev
+  let qIndex = -1;                           // index within queue
   let playing = false;
-  let progress = 0;        // 0..1
-  let posSec = 0, durSec = 0;
+  let progress = 0, posSec = 0, durSec = 0;
+
+  const curMenu = () => stack[stack.length - 1];
+  const isFolder = (node) => node && Array.isArray(node.items);
 
   // ----- reactive LED-equalizer backdrop -----
   const eqCanvas = document.getElementById("eq-canvas");
@@ -622,31 +626,33 @@ function renderAudio(tracks, media) {
   });
 
   // ----- rendering -----
-  function render() {
-    if (view === "menu") renderMenu();
-    else renderNow();
-  }
+  function render() { view === "menu" ? renderMenu() : renderNow(); }
 
   function renderMenu() {
+    const menu = curMenu();
+    const items = menu.items || [];
     screen.className = "ipod-screen view-menu";
     screen.innerHTML = `
-      <div class="screen-titlebar"><span class="tb-title">iPod</span><span class="tb-battery"></span></div>
+      <div class="screen-titlebar"><span class="tb-title">${menu.title}</span><span class="tb-battery"></span></div>
       <ul class="screen-list">
-        ${tracks.map((t, i) => `
-          <li class="screen-row${i === selected ? " selected" : ""}" data-i="${i}">
-            <span class="row-label">${t.title || "Untitled"}</span>
-            <span class="row-chevron">&rsaquo;</span>
-          </li>`).join("")}
+        ${items.length ? items.map((node, i) => `
+          <li class="screen-row${i === menu.selected ? " selected" : ""}" data-i="${i}">
+            <span class="row-label">${node.title || "Untitled"}</span>
+            ${isFolder(node)
+              ? `<span class="row-chevron">&rsaquo;</span>`
+              : `<span class="row-note">&#9834;</span>`}
+          </li>`).join("")
+        : `<li class="screen-empty">— empty —</li>`}
       </ul>`;
     screen.querySelectorAll(".screen-row").forEach((row) => {
-      row.addEventListener("click", () => { selected = +row.dataset.i; playTrack(selected); });
+      row.addEventListener("click", () => { menu.selected = +row.dataset.i; selectCurrent(); });
     });
     const sel = screen.querySelector(".screen-row.selected");
     if (sel) sel.scrollIntoView({ block: "nearest" });
   }
 
   function renderNow() {
-    const t = tracks[current] || {};
+    const t = queue[qIndex] || {};
     const art = media(t.art || t.cover || "");
     screen.className = "ipod-screen view-now";
     screen.innerHTML = `
@@ -654,7 +660,7 @@ function renderAudio(tracks, media) {
       <div class="now-body">
         <div class="now-art">${art ? `<img src="${art}" alt="" onerror="this.parentNode.innerHTML=musicNoteSVG()">` : musicNoteSVG()}</div>
         <div class="now-meta">
-          <div class="now-count">${current + 1} of ${tracks.length}</div>
+          <div class="now-count">${qIndex + 1} of ${queue.length}</div>
           <div class="now-title">${t.title || "Untitled"}</div>
           <div class="now-sub">${t.artist || ""}</div>
           <div class="now-sub now-album">${t.album || (t.tags ? t.tags.join(", ") : "")}</div>
@@ -684,30 +690,48 @@ function renderAudio(tracks, media) {
     screen.classList.toggle("is-paused", view === "now" && !playing);
   }
 
-  // ----- actions -----
-  function playTrack(i) {
-    current = i;
-    view = "now";
-    player.load(tracks[i], true);
-    render();
+  // ----- navigation / actions -----
+  function selectCurrent() {
+    const menu = curMenu();
+    const node = (menu.items || [])[menu.selected];
+    if (!node) return;
+    if (isFolder(node)) {
+      stack.push({ title: node.title, items: node.items || [], selected: 0 });
+      render();
+    } else {
+      // Build the play queue from the playable tracks in this folder
+      queue = (menu.items || []).filter((n) => !isFolder(n));
+      qIndex = queue.indexOf(node);
+      playCurrent();
+    }
   }
-  function nextTrack() { if (tracks.length) playTrack((current + 1) % tracks.length); }
-  function prevTrack() { if (tracks.length) playTrack((current - 1 + tracks.length) % tracks.length); }
-  function togglePlay() {
-    if (current < 0) { playTrack(selected); return; }
-    if (playing) player.pause(); else player.play();
-  }
+
   function moveSelection(d) {
-    selected = Math.max(0, Math.min(tracks.length - 1, selected + d));
+    const menu = curMenu();
+    const n = (menu.items || []).length;
+    if (!n) return;
+    menu.selected = Math.max(0, Math.min(n - 1, menu.selected + d));
     renderMenu();
   }
-  function goMenu() { view = "menu"; render(); }
+
+  function goBack() {
+    if (view === "now") { view = "menu"; render(); return; }
+    if (stack.length > 1) { stack.pop(); render(); }
+  }
+
+  function playCurrent() { view = "now"; player.load(queue[qIndex], true); render(); }
+  function nextTrack() { if (queue.length) { qIndex = (qIndex + 1) % queue.length; playCurrent(); } }
+  function prevTrack() { if (queue.length) { qIndex = (qIndex - 1 + queue.length) % queue.length; playCurrent(); } }
+  function togglePlay() {
+    if (qIndex < 0) { selectCurrent(); return; }
+    if (playing) player.pause(); else player.play();
+  }
 
   // ----- wheel buttons -----
-  document.getElementById("wheel-menu").addEventListener("click", goMenu);
+  document.getElementById("wheel-menu").addEventListener("click", goBack);
   document.getElementById("wheel-play").addEventListener("click", togglePlay);
   document.getElementById("wheel-center").addEventListener("click", () => {
-    if (view === "menu") playTrack(selected); else togglePlay();
+    if (view === "menu") selectCurrent(); else togglePlay();
   });
   document.getElementById("wheel-prev").addEventListener("click", () => {
     if (view === "menu") moveSelection(-1); else prevTrack();
@@ -720,11 +744,11 @@ function renderAudio(tracks, media) {
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowUp")    { e.preventDefault(); view === "menu" ? moveSelection(-1) : prevTrack(); }
     if (e.key === "ArrowDown")  { e.preventDefault(); view === "menu" ? moveSelection(1)  : nextTrack(); }
-    if (e.key === "ArrowLeft")  { view === "menu" ? null : prevTrack(); }
-    if (e.key === "ArrowRight") { view === "menu" ? null : nextTrack(); }
-    if (e.key === "Enter")      { view === "menu" ? playTrack(selected) : togglePlay(); }
+    if (e.key === "ArrowRight") { if (view === "menu") selectCurrent(); else nextTrack(); }
+    if (e.key === "ArrowLeft")  { if (view === "menu") goBack(); else prevTrack(); }
+    if (e.key === "Enter")      { view === "menu" ? selectCurrent() : togglePlay(); }
     if (e.key === " ")          { e.preventDefault(); togglePlay(); }
-    if (e.key === "Escape")     { goMenu(); }
+    if (e.key === "Escape" || e.key === "Backspace") { goBack(); }
   });
 
   render();
