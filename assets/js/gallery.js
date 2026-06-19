@@ -16,7 +16,7 @@ function initGallery({ section, contentPath }) {
       if (section === "photography") renderPhotography(entries, media);
       if (section === "film")        renderFilm(entries, media);
       if (section === "writing")     renderWriting(entries);
-      if (section === "audio")       renderAudio(entries, media);
+      if (section === "audio")       renderAudio(entries, media, data.mediaBase);
     });
 }
 
@@ -386,7 +386,11 @@ function renderFilm(films, media) {
     root.querySelector("#t-ff").addEventListener("click", () => player && player.seek(10));
 
     player = createFilmPlayer(document.getElementById("film-mount"), media, {
-      onState: (p) => { playing = p; updateTransport(); },
+      onState: (p) => {
+        playing = p; updateTransport();
+        // A film starting takes audio priority — pause the background music.
+        if (p && window.AudioService) window.AudioService.pauseForExternal();
+      },
       onProgress: (frac, pos, dur) => { progress = frac; posSec = pos; durSec = dur; updateProgress(); },
       onEnded: () => { playing = false; updateTransport(); },
     });
@@ -410,8 +414,8 @@ function renderFilm(films, media) {
     if (tot && durSec) tot.textContent = fmtTime(durSec);
   }
 
-  // ----- keyboard (remote) -----
-  document.addEventListener("keydown", (e) => {
+  // ----- keyboard (remote; cleaned up by the shell on navigation) -----
+  const onKey = (e) => {
     if (view === "list") {
       if (e.key === "ArrowUp")   { e.preventDefault(); selected = Math.max(0, selected - 1); syncSelection(); }
       if (e.key === "ArrowDown") { e.preventDefault(); selected = Math.min(films.length - 1, selected + 1); syncSelection(); }
@@ -425,7 +429,10 @@ function renderFilm(films, media) {
       if (e.key === "ArrowRight" && player) player.seek(10);
       if (e.key === "Escape" || e.key === "Backspace") { destroyPlayer(); openDetail(current); }
     }
-  });
+  };
+  if (window.MvuaApp) MvuaApp.onKey(onKey); else document.addEventListener("keydown", onKey);
+  // Stop the film if we navigate away mid-playback.
+  if (window.MvuaApp) MvuaApp.onCleanup(() => destroyPlayer());
 
   renderList();
 }
@@ -598,32 +605,32 @@ function makeWritingEntry(piece) {
 
 // ── Audio — 2000s iPod UI ─────────────────────────────────────────────────────
 
-function renderAudio(rootItems, media) {
+function renderAudio(rootItems, media, mediaBase) {
   const screen = document.getElementById("ipod-screen");
-  const audioEl = document.getElementById("ipod-audio");
+  const AS = window.AudioService;
+  if (AS && mediaBase != null) AS.setMediaBase(mediaBase);
 
   // ----- state -----
   let view = "menu";                         // "menu" | "now"
   // Navigation stack of menus. Each: { title, items, selected }
   const stack = [{ title: "iPod", items: rootItems || [], selected: 0 }];
-  let queue = [];                            // playable tracks for next/prev
-  let qIndex = -1;                           // index within queue
-  let playing = false;
-  let progress = 0, posSec = 0, durSec = 0;
 
   const curMenu = () => stack[stack.length - 1];
   const isFolder = (node) => node && Array.isArray(node.items);
 
-  // ----- reactive LED-equalizer backdrop -----
+  // ----- reactive LED-equalizer backdrop (reads the AudioService analyser) -----
   const eqCanvas = document.getElementById("eq-canvas");
-  const eq = eqCanvas ? createEqualizer(eqCanvas, audioEl) : null;
+  if (eqCanvas) createEqualizer(eqCanvas);
 
-  // ----- playback engine (HTML5 audio + SoundCloud widget) -----
-  const player = createAudioPlayer(audioEl, media, {
-    onProgress: (frac, pos, dur) => { progress = frac; posSec = pos; durSec = dur; if (view === "now") updateNowProgress(); },
-    onState:    (isPlaying) => { playing = isPlaying; updatePlayGlyph(); if (eq) eq.setActive(isPlaying); },
-    onEnded:    () => nextTrack(),
-  });
+  // ----- react to the shared AudioService (music persists across sections) -----
+  const onAudio = (e) => {
+    const type = e.detail && e.detail.type;
+    if (type === "track") { view = "now"; render(); }
+    else if (type === "state") updatePlayGlyph();
+    else if (type === "progress") { if (view === "now") updateNowProgress(); }
+  };
+  window.addEventListener("mvua:audio", onAudio);
+  if (window.MvuaApp) MvuaApp.onCleanup(() => window.removeEventListener("mvua:audio", onAudio));
 
   // ----- rendering -----
   function render() { view === "menu" ? renderMenu() : renderNow(); }
@@ -652,7 +659,8 @@ function renderAudio(rootItems, media) {
   }
 
   function renderNow() {
-    const t = queue[qIndex] || {};
+    const t = AS && AS.current;
+    if (!t) { view = "menu"; renderMenu(); return; }
     const art = media(t.art || t.cover || "");
     screen.className = "ipod-screen view-now";
     screen.innerHTML = `
@@ -660,7 +668,7 @@ function renderAudio(rootItems, media) {
       <div class="now-body">
         <div class="now-art">${art ? `<img src="${art}" alt="" onerror="this.parentNode.innerHTML=musicNoteSVG()">` : musicNoteSVG()}</div>
         <div class="now-meta">
-          <div class="now-count">${qIndex + 1} of ${queue.length}</div>
+          <div class="now-count">${AS.index + 1} of ${AS.length}</div>
           <div class="now-title">${t.title || "Untitled"}</div>
           <div class="now-sub">${t.artist || ""}</div>
           <div class="now-sub now-album">${t.album || (t.tags ? t.tags.join(", ") : "")}</div>
@@ -676,15 +684,18 @@ function renderAudio(rootItems, media) {
   }
 
   function updateNowProgress() {
+    if (!AS) return;
+    const { pos, dur } = AS.position();
     const fill = document.getElementById("now-fill");
-    if (fill) fill.style.width = (progress * 100).toFixed(1) + "%";
+    if (fill && dur) fill.style.width = (pos / dur * 100).toFixed(1) + "%";
     const el = screen.querySelector(".now-elapsed");
     const rem = screen.querySelector(".now-remaining");
-    if (el && durSec) el.textContent = fmtTime(posSec);
-    if (rem && durSec) rem.textContent = "-" + fmtTime(Math.max(0, durSec - posSec));
+    if (el && dur) el.textContent = fmtTime(pos);
+    if (rem && dur) rem.textContent = "-" + fmtTime(Math.max(0, dur - pos));
   }
 
   function updatePlayGlyph() {
+    const playing = AS && AS.isPlaying();
     const btn = document.getElementById("wheel-play");
     if (btn) btn.classList.toggle("is-playing", playing);
     screen.classList.toggle("is-paused", view === "now" && !playing);
@@ -694,15 +705,18 @@ function renderAudio(rootItems, media) {
   function selectCurrent() {
     const menu = curMenu();
     const node = (menu.items || [])[menu.selected];
-    if (!node) return;
+    if (!node || !AS) return;
     if (isFolder(node)) {
       stack.push({ title: node.title, items: node.items || [], selected: 0 });
       render();
     } else {
       // Build the play queue from the playable tracks in this folder
-      queue = (menu.items || []).filter((n) => !isFolder(n));
-      qIndex = queue.indexOf(node);
-      playCurrent();
+      const tracksHere = (menu.items || []).filter((n) => !isFolder(n) && n.src);
+      const i = tracksHere.indexOf(node);
+      if (i < 0) return;
+      view = "now";
+      AS.playQueue(tracksHere, i, mediaBase);
+      render();
     }
   }
 
@@ -719,91 +733,40 @@ function renderAudio(rootItems, media) {
     if (stack.length > 1) { stack.pop(); render(); }
   }
 
-  function playCurrent() { view = "now"; player.load(queue[qIndex], true); render(); }
-  function nextTrack() { if (queue.length) { qIndex = (qIndex + 1) % queue.length; playCurrent(); } }
-  function prevTrack() { if (queue.length) { qIndex = (qIndex - 1 + queue.length) % queue.length; playCurrent(); } }
   function togglePlay() {
-    if (qIndex < 0) { selectCurrent(); return; }
-    if (playing) player.pause(); else player.play();
+    if (!AS) return;
+    if (AS.index < 0) { selectCurrent(); return; }
+    AS.toggle();
   }
 
-  // ----- wheel buttons -----
+  // ----- wheel buttons (elements live inside #app, removed on navigation) -----
   document.getElementById("wheel-menu").addEventListener("click", goBack);
   document.getElementById("wheel-play").addEventListener("click", togglePlay);
   document.getElementById("wheel-center").addEventListener("click", () => {
     if (view === "menu") selectCurrent(); else togglePlay();
   });
   document.getElementById("wheel-prev").addEventListener("click", () => {
-    if (view === "menu") moveSelection(-1); else prevTrack();
+    if (view === "menu") moveSelection(-1); else AS && AS.prev();
   });
   document.getElementById("wheel-next").addEventListener("click", () => {
-    if (view === "menu") moveSelection(1); else nextTrack();
+    if (view === "menu") moveSelection(1); else AS && AS.next();
   });
 
-  // ----- keyboard -----
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowUp")    { e.preventDefault(); view === "menu" ? moveSelection(-1) : prevTrack(); }
-    if (e.key === "ArrowDown")  { e.preventDefault(); view === "menu" ? moveSelection(1)  : nextTrack(); }
-    if (e.key === "ArrowRight") { if (view === "menu") selectCurrent(); else nextTrack(); }
-    if (e.key === "ArrowLeft")  { if (view === "menu") goBack(); else prevTrack(); }
+  // ----- keyboard (registered via the shell so it is cleaned up on navigation) ----
+  const onKey = (e) => {
+    if (e.key === "ArrowUp")    { e.preventDefault(); view === "menu" ? moveSelection(-1) : AS && AS.prev(); }
+    if (e.key === "ArrowDown")  { e.preventDefault(); view === "menu" ? moveSelection(1)  : AS && AS.next(); }
+    if (e.key === "ArrowRight") { if (view === "menu") selectCurrent(); else AS && AS.next(); }
+    if (e.key === "ArrowLeft")  { if (view === "menu") goBack(); else AS && AS.prev(); }
     if (e.key === "Enter")      { view === "menu" ? selectCurrent() : togglePlay(); }
     if (e.key === " ")          { e.preventDefault(); togglePlay(); }
     if (e.key === "Escape" || e.key === "Backspace") { goBack(); }
-  });
+  };
+  if (window.MvuaApp) MvuaApp.onKey(onKey); else document.addEventListener("keydown", onKey);
 
+  // If music is already playing (returned to this section), show Now Playing.
+  if (AS && AS.current) view = "now";
   render();
-}
-
-// Dual-engine player: HTML5 <audio> for self-hosted, SoundCloud Widget for embeds
-function createAudioPlayer(audioEl, media, cb) {
-  let mode = "none";       // "html5" | "sc" | "none"
-  let scWidget = null, scIframe = null, scDur = 0;
-
-  function clearSC() { if (scIframe) { scIframe.remove(); scIframe = null; scWidget = null; } scDur = 0; }
-
-  function load(track, autoplay) {
-    audioEl.pause();
-    clearSC();
-
-    if (track.embed && track.embed.platform === "soundcloud" && window.SC) {
-      mode = "sc";
-      scIframe = document.createElement("iframe");
-      scIframe.allow = "autoplay";
-      scIframe.style.cssText = "position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0;";
-      scIframe.src = `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${track.embed.id}&auto_play=${autoplay ? "true" : "false"}`;
-      document.body.appendChild(scIframe);
-      scWidget = SC.Widget(scIframe);
-      scWidget.bind(SC.Widget.Events.READY, () => {
-        scWidget.getDuration((d) => { scDur = d / 1000; });
-        if (autoplay) scWidget.play();
-      });
-      scWidget.bind(SC.Widget.Events.PLAY,  () => cb.onState(true));
-      scWidget.bind(SC.Widget.Events.PAUSE, () => cb.onState(false));
-      scWidget.bind(SC.Widget.Events.FINISH, () => cb.onEnded());
-      scWidget.bind(SC.Widget.Events.PLAY_PROGRESS, (e) =>
-        cb.onProgress(e.relativePosition, e.currentPosition / 1000, scDur));
-    } else if (track.src) {
-      mode = "html5";
-      audioEl.src = media(track.src);
-      if (autoplay) audioEl.play().catch(() => {});
-    } else {
-      mode = "none";
-      cb.onState(false);
-    }
-  }
-
-  function play()  { if (mode === "sc" && scWidget) scWidget.play(); else if (mode === "html5") audioEl.play().catch(() => {}); }
-  function pause() { if (mode === "sc" && scWidget) scWidget.pause(); else if (mode === "html5") audioEl.pause(); }
-
-  audioEl.addEventListener("play",  () => { if (mode === "html5") cb.onState(true); });
-  audioEl.addEventListener("pause", () => { if (mode === "html5") cb.onState(false); });
-  audioEl.addEventListener("ended", () => { if (mode === "html5") cb.onEnded(); });
-  audioEl.addEventListener("timeupdate", () => {
-    if (mode === "html5" && audioEl.duration)
-      cb.onProgress(audioEl.currentTime / audioEl.duration, audioEl.currentTime, audioEl.duration);
-  });
-
-  return { load, play, pause };
 }
 
 function musicNoteSVG() {
@@ -820,10 +783,10 @@ function fmtTime(s) {
 }
 
 // ── Reactive dot-matrix LED equalizer ────────────────────────────────────────
-// Draws a grid of dots; columns rise like an equalizer. Uses real FFT data from
-// the audio element when the browser allows it (same-origin or CORS-enabled),
-// otherwise falls back to an animated simulation while audio is playing.
-function createEqualizer(canvas, audioEl) {
+// Draws a grid of dots; columns rise like an equalizer driven by the shared
+// AudioService's FFT data. The loop stops itself once the canvas is removed
+// from the DOM (i.e. when navigating away from the audio section).
+function createEqualizer(canvas) {
   const ctx = canvas.getContext("2d");
   const CELL = 15;           // dot grid spacing (px)
   let cols = 0, rows = 0, dpr = 1;
@@ -832,24 +795,6 @@ function createEqualizer(canvas, audioEl) {
   let heights = [];          // current column heights (0..1)
   let targets = [];          // eased-toward targets (0..1)
   let dim = null;            // offscreen dim-dot grid
-  let active = false;
-
-  // Web Audio analyser (best-effort)
-  let audioCtx = null, analyser = null, freqData = null, srcMade = false;
-
-  function ensureAnalyser() {
-    if (srcMade) return;
-    srcMade = true;
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const src = audioCtx.createMediaElementSource(audioEl);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 128;
-      freqData = new Uint8Array(analyser.frequencyBinCount);
-      src.connect(analyser);
-      analyser.connect(audioCtx.destination);
-    } catch (e) { analyser = null; }
-  }
 
   // Colour depends on the dot's absolute screen height: green at the bottom,
   // through yellow, to red at/above the red line (just above the iPod).
@@ -890,14 +835,13 @@ function createEqualizer(canvas, audioEl) {
   }
 
   function updateTargets() {
-    // Bars respond ONLY to real audio frequency data. When nothing is playing
-    // (or the audio can't be analysed) they settle flat.
-    if (active && analyser) {
-      analyser.getByteFrequencyData(freqData);
-      const usable = Math.floor(freqData.length * 0.72);
+    // Bars respond ONLY to real audio frequency data from the AudioService.
+    const freq = window.AudioService ? window.AudioService.getFreq() : null;
+    if (freq) {
+      const usable = Math.floor(freq.length * 0.72);
       for (let x = 0; x < cols; x++) {
         const bin = Math.floor((x / cols) * usable);
-        targets[x] = Math.min(1, (freqData[bin] / 255) * 1.15);
+        targets[x] = Math.min(1, (freq[bin] / 255) * 1.15);
       }
       return;
     }
@@ -905,6 +849,7 @@ function createEqualizer(canvas, audioEl) {
   }
 
   function frame() {
+    if (!canvas.isConnected) return; // navigated away — stop the loop
     updateTargets();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (dim) ctx.drawImage(dim, 0, 0);
@@ -925,19 +870,11 @@ function createEqualizer(canvas, audioEl) {
     requestAnimationFrame(frame);
   }
 
-  window.addEventListener("resize", resize);
+  const onResize = () => resize();
+  window.addEventListener("resize", onResize);
+  if (window.MvuaApp) MvuaApp.onCleanup(() => window.removeEventListener("resize", onResize));
   resize();
   requestAnimationFrame(frame);
-
-  return {
-    setActive(on) {
-      active = on;
-      if (on) {
-        ensureAnalyser();
-        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-      }
-    },
-  };
 }
 
 // ── Shared helpers ────────────────────────────────────────────────────────────

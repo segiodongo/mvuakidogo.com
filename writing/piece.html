@@ -5,28 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Writing — Your Name</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/gallery.js"></script>
+  <script src="../assets/js/home.js"></script>
+  <script src="../assets/js/about.js"></script>
+  <script src="../assets/js/piece.js"></script>
 </head>
 <body class="writing writing-piece">
+  <div id="app" data-section="piece">
 
-  <header class="page-header">
-    <a href="./" class="back-link">← writing</a>
-    <h1 id="piece-title"></h1>
-    <p class="piece-meta" id="piece-meta"></p>
-  </header>
+    <header class="page-header">
+      <a href="./" class="back-link">← writing</a>
+      <h1 id="piece-title"></h1>
+      <p class="piece-meta" id="piece-meta"></p>
+    </header>
 
-  <main>
-    <article class="piece-body" id="piece-body">
-      <!-- Markdown rendered here by JS -->
-    </article>
+    <main>
+      <article class="piece-body" id="piece-body">
+        <!-- Markdown rendered here by JS -->
+      </article>
 
-    <div class="piece-footer">
-      <a href="./" class="back-link">← back to writing</a>
-      <a href="" class="download-link" id="download-link" hidden>Download PDF</a>
-    </div>
-  </main>
+      <div class="piece-footer">
+        <a href="./" class="back-link">← back to writing</a>
+        <a href="" class="download-link" id="download-link" hidden>Download PDF</a>
+      </div>
+    </main>
 
-  <!-- marked.js converts .md files to HTML in the browser -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="../assets/js/piece.js"></script>
+    <script>initPiece("../content.json");</script>
+  </div>
 </body>
 </html>

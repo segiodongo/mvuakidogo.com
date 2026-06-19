@@ -5,17 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Film — Your Name</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/gallery.js"></script>
+  <script src="../assets/js/home.js"></script>
+  <script src="../assets/js/about.js"></script>
+  <script src="../assets/js/piece.js"></script>
 </head>
 <body class="film">
+  <div id="app" data-section="film">
 
-  <a href="../" class="tivo-home">← home</a>
+    <a href="../" class="tivo-home">← home</a>
+    <div class="tivo" id="tivo"></div>
 
-  <!-- DVR-guide UI (TiVo homage) populated by JS -->
-  <div class="tivo" id="tivo"></div>
-
-  <script src="../assets/js/gallery.js"></script>
-  <script>
-    initGallery({ section: "film", contentPath: "../content.json" });
-  </script>
+    <script>initGallery({ section: "film", contentPath: "../content.json" });</script>
+  </div>
 </body>
 </html>

@@ -1,57 +1,49 @@
 /**
- * piece.js
- * Loads a single writing piece from content.json, fetches its .md file,
- * and renders it using marked.js (loaded in piece.html).
+ * piece.js — renders a single writing piece (markdown via marked.js).
+ * Exposes initPiece(contentPath). Loads marked.js on demand.
  */
-
-function mediaUrl(base, path) {
-  if (!path) return path;
-  if (path.startsWith("http")) return path;
-  if (!base) return path;
-  return base.replace(/\/$/, "") + "/" + path.replace(/^\//, "");
-}
-
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
-
-if (!id) {
-  window.location.href = "./";
-}
-
-fetch("../content.json")
-  .then((r) => r.json())
-  .then((data) => {
-    const media = (path) => mediaUrl(data.mediaBase, path);
-    const piece = (data.writing || []).find((p) => p.id === id);
-
-    if (!piece) {
-      document.querySelector(".piece-body").textContent = "Piece not found.";
-      return;
-    }
-
-    document.title = `${piece.title} — ${data.site.name}`;
-    document.getElementById("piece-title").textContent = piece.title;
-
-    const meta = [piece.year, ...(piece.tags || [])].join(" · ");
-    document.getElementById("piece-meta").textContent = meta;
-
-    if (piece.downloadPdf) {
-      const dl = document.getElementById("download-link");
-      dl.href = media(piece.downloadPdf);
-      dl.hidden = false;
-    }
-
-    // .md content files stay in the repo — fetched relative to the page
-    return fetch(`../${piece.content}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Could not load content file.");
-        return r.text();
-      })
-      .then((md) => {
-        document.getElementById("piece-body").innerHTML = marked.parse(md);
-      });
-  })
-  .catch((err) => {
-    document.getElementById("piece-body").textContent =
-      "Could not load this piece. " + err.message;
+function ensureMarked() {
+  if (window.__markedReady) return window.__markedReady;
+  window.__markedReady = new Promise((res) => {
+    if (window.marked) return res();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    s.onload = () => res();
+    document.head.appendChild(s);
   });
+  return window.__markedReady;
+}
+
+function initPiece(contentPath) {
+  const id = new URLSearchParams(location.search).get("id");
+  const bodyEl = document.getElementById("piece-body");
+  if (!id) { if (bodyEl) bodyEl.textContent = "No piece selected."; return; }
+
+  const contentURL = new URL(contentPath || "../content.json", location.href);
+
+  ensureMarked()
+    .then(() => fetch(contentURL).then((r) => r.json()))
+    .then((data) => {
+      const piece = (data.writing || []).find((p) => p.id === id);
+      if (!piece) { bodyEl.textContent = "Piece not found."; return; }
+
+      const media = (p) => mediaUrl(data.mediaBase, p);
+      document.title = `${piece.title} — ${data.site.name}`;
+      document.getElementById("piece-title").textContent = piece.title;
+      document.getElementById("piece-meta").textContent =
+        [piece.year, ...(piece.tags || [])].join(" · ");
+
+      if (piece.downloadPdf) {
+        const dl = document.getElementById("download-link");
+        if (dl) { dl.href = media(piece.downloadPdf); dl.hidden = false; }
+      }
+
+      // .md files live in the repo, resolved relative to content.json
+      const mdURL = new URL(piece.content, contentURL);
+      return fetch(mdURL)
+        .then((r) => { if (!r.ok) throw new Error("Could not load content file."); return r.text(); })
+        .then((md) => { bodyEl.innerHTML = marked.parse(md); });
+    })
+    .catch((err) => { if (bodyEl) bodyEl.textContent = "Could not load this piece. " + err.message; });
+}
+window.initPiece = initPiece;

@@ -5,22 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Name</title>
   <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/gallery.js"></script>
+  <script src="assets/js/home.js"></script>
+  <script src="assets/js/about.js"></script>
+  <script src="assets/js/piece.js"></script>
 </head>
 <body class="home">
+  <div id="app" data-section="home">
 
-  <header class="site-header">
-    <h1 class="site-name">Your Name</h1>
-    <p class="site-tagline"></p>
-  </header>
+    <header class="site-header">
+      <h1 class="site-name">Your Name</h1>
+      <p class="site-tagline"></p>
+    </header>
 
-  <nav class="nav-grid" aria-label="Site sections">
-    <!-- Populated by JS from content.json nav array -->
-  </nav>
+    <nav class="nav-grid" aria-label="Site sections">
+      <!-- Populated by JS from content.json nav array -->
+    </nav>
 
-  <footer class="site-footer">
-    <p></p>
-  </footer>
+    <footer class="site-footer">
+      <p></p>
+    </footer>
 
-  <script src="assets/js/home.js"></script>
+    <script>initHome("content.json");</script>
+  </div>
 </body>
 </html>

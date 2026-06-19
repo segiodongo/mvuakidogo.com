@@ -5,26 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Writing — Your Name</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/gallery.js"></script>
+  <script src="../assets/js/home.js"></script>
+  <script src="../assets/js/about.js"></script>
+  <script src="../assets/js/piece.js"></script>
 </head>
 <body class="writing">
+  <div id="app" data-section="writing">
 
-  <header class="page-header">
-    <a href="../" class="back-link">← home</a>
-    <h1>Writing</h1>
-  </header>
+    <header class="page-header">
+      <a href="../" class="back-link">← home</a>
+      <h1>Writing</h1>
+    </header>
 
-  <main>
-    <div class="tag-filters" aria-label="Filter by tag">
-      <!-- Tags populated by JS -->
-    </div>
-    <ul class="writing-list">
-      <!-- Writing entries populated by JS from content.json -->
-    </ul>
-  </main>
+    <main>
+      <div class="tag-filters" aria-label="Filter by tag">
+        <!-- Tags populated by JS -->
+      </div>
+      <ul class="writing-list">
+        <!-- Writing entries populated by JS from content.json -->
+      </ul>
+    </main>
 
-  <script src="../assets/js/gallery.js"></script>
-  <script>
-    initGallery({ section: "writing", contentPath: "../content.json" });
-  </script>
+    <script>initGallery({ section: "writing", contentPath: "../content.json" });</script>
+  </div>
 </body>
 </html>

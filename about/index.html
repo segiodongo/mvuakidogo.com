@@ -5,25 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About — Your Name</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/gallery.js"></script>
+  <script src="../assets/js/home.js"></script>
+  <script src="../assets/js/about.js"></script>
+  <script src="../assets/js/piece.js"></script>
 </head>
 <body class="about">
+  <div id="app" data-section="about">
 
-  <header class="page-header">
-    <a href="../" class="back-link">← home</a>
-    <h1>About</h1>
-  </header>
+    <header class="page-header">
+      <a href="../" class="back-link">← home</a>
+      <h1>About</h1>
+    </header>
 
-  <main class="about-body">
-    <section class="about-bio">
-      <p id="about-bio"></p>
-    </section>
+    <main class="about-body">
+      <section class="about-bio">
+        <p id="about-bio"></p>
+      </section>
 
-    <section class="about-contact">
-      <h2>Contact</h2>
-      <ul id="about-contact"></ul>
-    </section>
-  </main>
+      <section class="about-contact">
+        <h2>Contact</h2>
+        <ul id="about-contact"></ul>
+      </section>
+    </main>
 
-  <script src="../assets/js/about.js"></script>
+    <script>initAbout("../content.json");</script>
+  </div>
 </body>
 </html>

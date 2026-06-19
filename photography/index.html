@@ -3,32 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Photography </title>
+  <title>Photography</title>
   <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/gallery.js"></script>
+  <script src="../assets/js/home.js"></script>
+  <script src="../assets/js/about.js"></script>
+  <script src="../assets/js/piece.js"></script>
 </head>
 <body class="photography">
+  <div id="app" data-section="photography">
 
-  <div class="desktop">
-
-    <!-- App window title bar -->
-    <div class="app-titlebar">
-      <span class="app-titlebar-icon" aria-hidden="true">
-        <svg viewBox="0 0 16 16" width="14" height="14"><rect x="1" y="2" width="14" height="12" fill="#fff" stroke="#000"/><rect x="1" y="2" width="14" height="3" fill="#000080"/><circle cx="5" cy="9" r="1.5" fill="#ffd23f"/><path d="M2 13l3-3 2 2 3-4 4 5z" fill="#3a7d3a"/></svg>
-      </span>
-      <span class="app-titlebar-text">Photography</span>
-      <span class="app-titlebar-buttons">
-        <a href="../" class="win-btn" title="Home" aria-label="Home">⌂</a>
-      </span>
+    <div class="desktop">
+      <div class="app-titlebar">
+        <span class="app-titlebar-icon" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="14" height="14"><rect x="1" y="2" width="14" height="12" fill="#fff" stroke="#000"/><rect x="1" y="2" width="14" height="3" fill="#000080"/><circle cx="5" cy="9" r="1.5" fill="#ffd23f"/><path d="M2 13l3-3 2 2 3-4 4 5z" fill="#3a7d3a"/></svg>
+        </span>
+        <span class="app-titlebar-text">Photography</span>
+        <span class="app-titlebar-buttons">
+          <a href="../" class="win-btn" title="Home" aria-label="Home">⌂</a>
+        </span>
+      </div>
+      <main class="desktop-area" id="desktop-area"></main>
     </div>
 
-    <!-- Desktop work area: populated by JS (grid view or series view) -->
-    <main class="desktop-area" id="desktop-area"></main>
-
+    <script>initGallery({ section: "photography", contentPath: "../content.json" });</script>
   </div>
-
-  <script src="../assets/js/gallery.js"></script>
-  <script>
-    initGallery({ section: "photography", contentPath: "../content.json" });
-  </script>
 </body>
 </html>
