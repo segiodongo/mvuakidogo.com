@@ -61,6 +61,17 @@
         { "src": "photography/QMUL_Skate/qmul_skate_1.jpg", "title": "", "caption": "shot on Sony a7iii, October, 2024" },
         { "src": "photography/QMUL_Skate/qmul_skate_2.jpg", "title": "", "caption": "shot on Sony a7iii, October, 2024" }
       ]
+    },
+    {
+      "id": "studio-shoot_(4/5/2025)",
+      "title": "Studio Shoot (4/5/2025)",
+      "year": 2025,
+      "photos": [
+        { "src": "photography/studio_photoshoot_(4:5:2025)/devi_teeth_picture.png", "title": "devi teeth picture", "caption": "shot on Sony a7iii, April, 2025" },
+        { "src": "photography/studio_photoshoot_(4:5:2025)/forever_earring_picture.png", "title": "forever_earring_picture", "caption": "shot on Sony a7iii, April, 2025" },
+        { "src": "photography/studio_photoshoot_(4:5:2025)/forever_eye_earring_pic.png", "title": "forever_earring_picture", "caption": "shot on Sony a7iii, April, 2025" },
+        { "src": "photography/studio_photoshoot_(4:5:2025)/shalom_eye_pic.png", "title": "Studio Shoot (4:5:2025)", "caption": "shot on Sony a7iii, April, 2025" }
+      ]
     }
   ],
 
@@ -71,9 +82,19 @@
       "year": 2024,
       "duration": "0:55",
       "tags": ["travel vlog"],
-      "thumb": "images/film/example-film-thumb.jpg",
+      "thumb": "film/sintra-thumbnail.jpg",
       "src": "film/sintra.mov",
       "description": "A short video in Sintra's castle"
+    },
+    {
+      "id": "porto",
+      "title": "porto.mov",
+      "year": 2024,
+      "duration": "0:21",
+      "tags": ["travel vlog"],
+      "thumb": "film/porto-thumbnail.jpg",
+      "src": "film/porto.mov",
+      "description": "A short video in Porto's streets on a rainy day"
     }
   ],
 
@@ -102,11 +123,11 @@
       "title": "Music",
       "items": [
         {
-          "title": "Electronic",
+          "title": "Instrumental",
           "items": [
             {
-              "id": "live_dupe",
-              "title": "live_dupe (6_9_2026).wav",
+              "id": "liv.e_dupe",
+              "title": "liv.e_dupe (6_9_2026).wav",
               "year": 2024,
               "duration": "1:47",
               "artist": "",
@@ -114,12 +135,107 @@
               "tags": ["music"],
               "src": "audio/live_dupe (6_9_2026).wav",
               "description": "liv.e dupe :P"
+            },
+            {
+              "id": "underwater_(2_10_2026)",
+              "title": "underwater (2_10_2026).wav",
+              "year": 2024,
+              "duration": "2:03",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/underwater (2_10_2026)(mix 2) copy.wav",
+              "description": "sounds of the ocean"
+            },
+            {
+              "id": "I would've married you_(1_1_2026)",
+              "title": "I would've married you_(1_1_2026).wav",
+              "year": 2026,
+              "duration": "0:43",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/i wouldve married you (1:1:2026) copy.wav",
+              "description": "sigh"
+            },
+            {
+              "id": "disco_sample_(sped_up)(12_20_2025)",
+              "title": "disco_sample_(sped_up)(12_20_2025).wav",
+              "year": 2025,
+              "duration": "0:43",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/drum sample (12_20_2025) (sped up)_1 copy.wav",
+              "description": "get funky wid it"
             }
           ]
         },
         {
-          "title": "Ambient",
-          "items": []
+          "title": "Remix / reharm",
+          "items": [
+            {
+              "id": "disco_kickin_rocks_remix",
+              "title": "disco_kickin_rocks_remix (1_2_2026).wav",
+              "year": 2026,
+              "duration": "1:17",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/disco kickin rocks remix (mix 2) copy.wav",
+              "description": "shout out liim n nem"
+            },
+            {
+              "id": "i_love_lucy_reharm(11/22/2025)",
+              "title": "i_love_lucy_reharm(11/22/2025).wav",
+              "year": 2025,
+              "duration": "2:46",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/I love lucy reharm (11_22_2025)(mix 2) copy.wav",
+              "description": "loving lucy is a full time job"
+            }
+          ]
+        },
+        {
+          "title": "Songs",
+          "items": [
+            
+            {
+              "id": "body_and_soul(2_14_2026)",
+              "title": "body_and_soul(2_14_2026).wav",
+              "year": 2026,
+              "duration": "1:17",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/body and soul (2_14_2026) copy.wav",
+              "description": "standing on the corner dupe"
+            },
+            {
+              "id": "run_baby_run_(6/23/2026)",
+              "title": "run_baby_run_(6/23/2026).wav",
+              "year": 2026,
+              "duration": "0:56",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/vocal finger exersize (11_9_2025)(mix : master 4) copy.wav",
+              "description": "run baby run baby run"
+            },
+            {
+              "id": "lil_poetry_jawns_(7/2/2025)",
+              "title": "close_them_doors(7/2/2025).wav",
+              "year": 2025,
+              "duration": "1:06",
+              "artist": "",
+              "album": "",
+              "tags": ["music"],
+              "src": "audio/lil poetry jawn (7_2_2025) (mix 8) copy.wav",
+              "description": "the doors must be opened..."
+            }
+          ]
         }
       ]
     }

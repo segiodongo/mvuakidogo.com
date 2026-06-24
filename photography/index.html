@@ -27,6 +27,30 @@
       <main class="desktop-area" id="desktop-area"></main>
     </div>
 
+    <!-- Windows 9x taskbar -->
+    <div class="win-taskbar">
+      <button class="start-btn" type="button">
+        <span class="start-logo" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="15" height="15">
+            <path d="M1 3.2 L7 2.2 V7 L1 7.4 Z" fill="#e84a3b"/>
+            <path d="M8 2.05 L15 1.1 V7 L8 7 Z" fill="#46b048"/>
+            <path d="M1 8.6 L7 8.2 V13 L1 13.8 Z" fill="#2e8bd6"/>
+            <path d="M8 8 L15 7.7 V13 L8 13.4 Z" fill="#f5c531"/>
+          </svg>
+        </span>
+        Start
+      </button>
+      <div class="taskbar-tasks">
+        <button class="task-btn" type="button">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M1 4h5l1 1h8v8H1z" fill="#ffd23f" stroke="#000"/></svg>
+          Photography
+        </button>
+      </div>
+      <div class="taskbar-tray">
+        <span class="tray-clock" id="tray-clock"></span>
+      </div>
+    </div>
+
     <script>initGallery({ section: "photography", contentPath: "../content.json" });</script>
   </div>
 </body>

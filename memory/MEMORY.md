@@ -5,3 +5,4 @@
 - [Aesthetic reference: "old 2000's ipod frontend"](reference_old_ipod_frontend.md) — classic iPod Photo/Nano UI: white hardware, blue selection highlight, list menus with chevrons, now-playing with album art
 - [Aesthetic reference: "old windows software ui frontend"](reference_old_windows_ui.md) — Windows 95/98/XP era UI: blue title bars, beveled grey panels, pixel icons, chunky dialogs, skeuomorphic OS chrome
 - [Aesthetic reference: "old book ui frontend"](reference_old_book_ui.md) — The Long Dark journal UI: two-page parchment book spread, sepia tones, engraved icons, list+detail layout, diegetic ink-on-paper feel
+- [Aesthetic reference: "old xfinity on demand"](reference_old_xfinity_on_demand.md) — mid-2000s Comcast/Xfinity cable menu: blue gradient, two columns of rounded oval pills, pale-yellow selection, top-right preview thumbnail, top-left description

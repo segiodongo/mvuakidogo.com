@@ -36,12 +36,32 @@ function renderPhotography(projects, media) {
   const params = new URLSearchParams(location.search);
   const projectId = params.get("project");
 
+  startWinClock();
+
   if (projectId) {
     const project = projects.find((p) => p.id === projectId);
     renderSeriesView(area, project, media);
   } else {
     renderSeriesGrid(area, projects, media);
   }
+}
+
+// Taskbar clock (Windows 9x style), cleaned up on navigation
+function startWinClock() {
+  const tick = () => {
+    const el = document.getElementById("tray-clock");
+    if (!el) return;
+    const d = new Date();
+    let h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2, "0");
+    const ap = h < 12 ? "AM" : "PM";
+    h = h % 12 || 12;
+    el.textContent = `${h}:${m} ${ap}`;
+  };
+  tick();
+  if (window.__winClock) clearInterval(window.__winClock);
+  window.__winClock = setInterval(tick, 15000);
+  if (window.MvuaApp) MvuaApp.onCleanup(() => { clearInterval(window.__winClock); window.__winClock = null; });
 }
 
 // When an image 404s or fails to decode, swap in the placeholder icon
@@ -282,50 +302,90 @@ function renderFilm(films, media) {
   // ----- video player engine (created lazily in player view) -----
   let player = null;
 
-  // ----- LIST (Now Playing) -----
+  const filmThumb = (f) => {
+    const t = media(f.thumb || f.cover || "");
+    return t ? `<img src="${t}" alt="" onerror="this.style.display='none'">` : "";
+  };
+
+  // ----- LIST (Xfinity / Comcast on-demand homepage) -----
   function renderList() {
     view = "list";
-    root.className = "tivo view-list";
+    root.className = "xf-guide";
+    const f = films[selected] || {};
     root.innerHTML = `
-      <header class="tv-header">
-        ${MVUA_LOGO}
-        <h1 class="tv-title">Now Playing List</h1>
-        <div class="tv-watermarks" aria-hidden="true">
-          <span class="tv-wm tv-wm-1">mvua</span>
-          <span class="tv-wm tv-wm-2">mvua</span>
-          <span class="tv-wm tv-wm-3">mvua</span>
-        </div>
-      </header>
-      <div class="tv-panel">
-        <span class="tv-scroll tv-scroll-up">&#9650;</span>
-        <ul class="tivo-list" id="tivo-list">
-          ${films.map((film, i) => `
-            <li class="tivo-row${i === selected ? " selected" : ""}" data-i="${i}">
-              <span class="row-chev row-chev-l">&#8249;</span>
-              <span class="row-orb"></span>
-              <span class="row-title">${film.title || "Untitled"}</span>
-              <span class="row-date">${[film.year, film.duration].filter(Boolean).join("&nbsp;&nbsp;&nbsp;")}</span>
-              <span class="row-chev row-chev-r">&#8250;</span>
-            </li>`).join("")}
-        </ul>
-        <span class="tv-scroll tv-scroll-down">&#9660;</span>
-      </div>
-      <footer class="tv-status">Sorted by date&nbsp;&nbsp;(press SELECT / click to open)</footer>`;
+      <div class="xf-screen">
+        <section class="xf-sec xf-sec-top">
+          <div class="xf-top-left">
+            <header class="xf-header">
+              <span class="xf-logo">mvua</span>
+              <span class="xf-clock" id="xf-clock"></span>
+              <span class="xf-badge"><b>TV</b><span>GUIDE</span></span>
+            </header>
+            <div class="xf-info">
+              <span class="xf-info-icon" aria-hidden="true">▤</span>
+              <div class="xf-info-text">
+                <h2 class="xf-info-title" id="xf-title">${f.title || ""}</h2>
+                <p class="xf-info-desc" id="xf-desc">${f.description || ""}</p>
+              </div>
+            </div>
+          </div>
+          <div class="xf-preview" id="xf-preview">
+            ${filmThumb(f)}
+            <span class="xf-preview-cap">${f.title || ""}</span>
+          </div>
+        </section>
 
-    root.querySelectorAll(".tivo-row").forEach((row) => {
-      row.addEventListener("mouseenter", () => { selected = +row.dataset.i; syncSelection(); });
-      row.addEventListener("click", () => { selected = +row.dataset.i; openDetail(selected); });
+        <section class="xf-sec xf-sec-bottom">
+          <ul class="xf-pills" id="xf-pills">
+            ${films.map((film, i) => `
+              <li class="xf-pill${i === selected ? " selected" : ""}" data-i="${i}">
+                <span class="xf-pill-label">${film.title || "Untitled"}</span>
+              </li>`).join("")}
+          </ul>
+          <footer class="xf-more">More &#9660; Choices</footer>
+        </section>
+      </div>
+      <div class="xf-crt" aria-hidden="true"></div>`;
+
+    root.querySelectorAll(".xf-pill").forEach((p) => {
+      p.addEventListener("mouseenter", () => { selected = +p.dataset.i; syncSelection(); });
+      p.addEventListener("click", () => openPlayer(+p.dataset.i));
     });
-    const sel = root.querySelector(".tivo-row.selected");
-    if (sel) sel.scrollIntoView({ block: "nearest" });
+    startClock();
+    syncSelection();
   }
 
-  // Move the highlight without re-rendering the whole list (keeps it snappy)
+  // Live clock in the header (cleaned up on navigation)
+  function startClock() {
+    const tick = () => {
+      const el = document.getElementById("xf-clock");
+      if (!el) return;
+      const d = new Date();
+      let h = d.getHours();
+      const m = String(d.getMinutes()).padStart(2, "0");
+      const ap = h < 12 ? "am" : "pm";
+      h = h % 12 || 12;
+      el.textContent = `${h}:${m}${ap}`;
+    };
+    tick();
+    if (window.__xfClock) clearInterval(window.__xfClock);
+    window.__xfClock = setInterval(tick, 20000);
+    if (window.MvuaApp) MvuaApp.onCleanup(() => { clearInterval(window.__xfClock); window.__xfClock = null; });
+  }
+
+  // Move the highlight + update the info pane and preview, without re-rendering
   function syncSelection() {
-    root.querySelectorAll(".tivo-row").forEach((r) => {
-      r.classList.toggle("selected", +r.dataset.i === selected);
+    root.querySelectorAll(".xf-pill").forEach((p) => {
+      p.classList.toggle("selected", +p.dataset.i === selected);
     });
-    const sel = root.querySelector(".tivo-row.selected");
+    const f = films[selected] || {};
+    const title = document.getElementById("xf-title");
+    const desc = document.getElementById("xf-desc");
+    const prev = document.getElementById("xf-preview");
+    if (title) title.textContent = f.title || "";
+    if (desc) desc.textContent = f.description || "";
+    if (prev) prev.innerHTML = filmThumb(f) + `<span class="xf-preview-cap">${f.title || ""}</span>`;
+    const sel = root.querySelector(".xf-pill.selected");
     if (sel) sel.scrollIntoView({ block: "nearest" });
   }
 
@@ -362,25 +422,30 @@ function renderFilm(films, media) {
   function openPlayer(i) {
     current = i; view = "player";
     const f = films[i] || {};
-    root.className = "tivo view-player";
+    root.className = "xf-player";
     root.innerHTML = `
-      <header class="tivo-header">
-        <button class="tivo-back" id="tivo-back">&#8249; Back</button>
-        <span class="tivo-header-sub">${f.title || ""}</span>
-      </header>
-      <div class="tivo-player">
-        <div class="player-screen"><div id="film-mount"></div><span class="preview-scan"></span></div>
-        <div class="player-transport">
-          <button class="trans-btn" id="t-rew" aria-label="Rewind 10s">&#9194;</button>
-          <button class="trans-btn play" id="t-play" aria-label="Play / Pause">&#9199;</button>
-          <button class="trans-btn" id="t-ff" aria-label="Forward 10s">&#9193;</button>
-          <span class="trans-time" id="t-elapsed">0:00</span>
-          <div class="tivo-progress"><div class="tivo-progress-fill" id="t-fill"></div></div>
-          <span class="trans-time" id="t-total">${f.duration || ""}</span>
+      <div class="xf-player-screen">
+        <header class="xf-header">
+          <button class="xf-back" id="xf-back">&#8249; Back</button>
+          <span class="xf-player-title">${f.title || ""}</span>
+          <span class="xf-clock" id="xf-clock"></span>
+          <span class="xf-badge"><b>TV</b><span>GUIDE</span></span>
+        </header>
+        <div class="xf-player-stage">
+          <div class="xf-video"><div id="film-mount"></div></div>
         </div>
-        <p class="player-desc">${f.description || ""}</p>
+        <div class="xf-transport">
+          <button class="xf-tbtn" id="t-rew" aria-label="Rewind 10s">&#9668;&#9668;</button>
+          <button class="xf-tbtn play" id="t-play" aria-label="Play / Pause">&#9658;</button>
+          <button class="xf-tbtn" id="t-ff" aria-label="Forward 10s">&#9658;&#9658;</button>
+          <span class="xf-time" id="t-elapsed">0:00</span>
+          <div class="xf-progress"><div class="xf-progress-fill" id="t-fill"></div></div>
+          <span class="xf-time" id="t-total">${f.duration || ""}</span>
+        </div>
+        <p class="xf-player-desc">${f.description || ""}</p>
       </div>`;
-    root.querySelector("#tivo-back").addEventListener("click", () => { destroyPlayer(); openDetail(i); });
+    startClock();
+    root.querySelector("#xf-back").addEventListener("click", () => { destroyPlayer(); renderList(); });
     root.querySelector("#t-play").addEventListener("click", togglePlay);
     root.querySelector("#t-rew").addEventListener("click", () => player && player.seek(-10));
     root.querySelector("#t-ff").addEventListener("click", () => player && player.seek(10));
@@ -403,7 +468,7 @@ function renderFilm(films, media) {
 
   function updateTransport() {
     const btn = root.querySelector("#t-play");
-    if (btn) btn.classList.toggle("is-playing", playing);
+    if (btn) btn.textContent = playing ? "❚❚" : "►";
   }
   function updateProgress() {
     const fill = root.querySelector("#t-fill");
@@ -417,9 +482,12 @@ function renderFilm(films, media) {
   // ----- keyboard (remote; cleaned up by the shell on navigation) -----
   const onKey = (e) => {
     if (view === "list") {
-      if (e.key === "ArrowUp")   { e.preventDefault(); selected = Math.max(0, selected - 1); syncSelection(); }
-      if (e.key === "ArrowDown") { e.preventDefault(); selected = Math.min(films.length - 1, selected + 1); syncSelection(); }
-      if (e.key === "Enter")     { openDetail(selected); }
+      const last = films.length - 1;
+      if (e.key === "ArrowUp")    { e.preventDefault(); selected = Math.max(0, selected - 2); syncSelection(); }
+      if (e.key === "ArrowDown")  { e.preventDefault(); selected = Math.min(last, selected + 2); syncSelection(); }
+      if (e.key === "ArrowLeft")  { e.preventDefault(); selected = Math.max(0, selected - 1); syncSelection(); }
+      if (e.key === "ArrowRight") { e.preventDefault(); selected = Math.min(last, selected + 1); syncSelection(); }
+      if (e.key === "Enter")      { openPlayer(selected); }
     } else if (view === "detail") {
       if (e.key === "Enter")  { openPlayer(current); }
       if (e.key === "Escape" || e.key === "Backspace") { renderList(); }
@@ -427,7 +495,7 @@ function renderFilm(films, media) {
       if (e.key === " ")      { e.preventDefault(); togglePlay(); }
       if (e.key === "ArrowLeft"  && player) player.seek(-10);
       if (e.key === "ArrowRight" && player) player.seek(10);
-      if (e.key === "Escape" || e.key === "Backspace") { destroyPlayer(); openDetail(current); }
+      if (e.key === "Escape" || e.key === "Backspace") { destroyPlayer(); renderList(); }
     }
   };
   if (window.MvuaApp) MvuaApp.onKey(onKey); else document.addEventListener("keydown", onKey);
@@ -459,7 +527,11 @@ function createFilmPlayer(mount, media, cb) {
       vid.src = media(film.src);
       vid.playsInline = true;
       vid.preload = "metadata";
-      vid.addEventListener("loadedmetadata", () => { dur = vid.duration; });
+      vid.addEventListener("loadedmetadata", () => {
+        dur = vid.duration;
+        const box = vid.closest(".xf-video");
+        if (box && vid.videoWidth) box.style.aspectRatio = vid.videoWidth + " / " + vid.videoHeight;
+      });
       vid.addEventListener("play", () => cb.onState(true));
       vid.addEventListener("pause", () => cb.onState(false));
       vid.addEventListener("ended", () => cb.onEnded());

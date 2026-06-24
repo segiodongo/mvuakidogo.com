@@ -15,7 +15,13 @@
   <div id="app" data-section="film">
 
     <a href="../" class="tivo-home">← home</a>
-    <div class="tivo" id="tivo"></div>
+
+    <!-- The whole film UI is "played" inside this CRT TV shell -->
+    <div class="tv-shell">
+      <div class="tv-screen">
+        <div class="tivo" id="tivo"></div>
+      </div>
+    </div>
 
     <script>initGallery({ section: "film", contentPath: "../content.json" });</script>
   </div>

@@ -172,8 +172,72 @@ body.film {
   color: var(--tv-text);
   /* Narrow / condensed type to match the broadcast guide */
   font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", "Helvetica Neue", Arial, sans-serif;
-  /* Flat, matte teal → deep-green broadcast gradient (no glossy hotspot) */
-  background: linear-gradient(180deg, #379a82 0%, #20705e 30%, #124c40 58%, #0a3329 78%, #041d17 100%);
+  background: #000;
+}
+
+/* ── CRT TV shell — the whole film UI plays inside the screen window ───────── */
+.film #app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.film .tv-shell {
+  position: relative;
+  height: 98vh;
+  aspect-ratio: 282 / 266;
+  max-width: 100vw;
+  background: url("../ui/tv-frame.webp") center / 100% 100% no-repeat;
+}
+.film .tv-screen {
+  /* Measured to the TV's transparent screen opening (% of .tv-shell, so it
+     stays aligned when the TV image is scaled). */
+  position: absolute;
+  top: 12.41%;
+  left: 11.7%;
+  width: 76.6%;
+  height: 59.4%;
+  overflow: hidden;
+  border-radius: 5% / 6%;
+  background: #000;
+}
+
+/* Curved-glass distortion: corners darken and recede like a real CRT tube */
+.film .tv-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  border-radius: inherit;
+  background:
+    radial-gradient(135% 130% at 50% 48%,
+      transparent 52%,
+      rgba(0, 0, 0, 0.18) 74%,
+      rgba(0, 0, 0, 0.45) 90%,
+      rgba(0, 0, 0, 0.8) 100%);
+  box-shadow:
+    inset 0 0 26px 6px rgba(0, 0, 0, 0.55),
+    inset 0 0 80px 30px rgba(0, 0, 0, 0.22);
+  mix-blend-mode: multiply;
+}
+/* A faint convex sheen near the top — sells the bulging glass */
+.film .tv-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 21;
+  border-radius: inherit;
+  background: radial-gradient(70% 50% at 50% 8%, rgba(255, 255, 255, 0.07), transparent 60%);
+}
+.film .tv-screen #tivo {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  min-height: 0;
+  margin: 0;
+  border-radius: 0;
 }
 
 .film .tivo-home {
@@ -361,6 +425,260 @@ body.film {
   background: repeating-linear-gradient(180deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 3px);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   FILM list — "old xfinity on demand" homepage
+   ═════════════════════════════════════════════════════════════════════════ */
+.film .xf-guide {
+  --xf-blue-a: #2e6fd6;
+  --xf-blue-b: #15347e;
+  --xf-pill-a: #2f6ad0;
+  --xf-pill-b: #1c428f;
+  --xf-yellow-a: #fffbcf;
+  --xf-yellow-b: #ece08a;
+  --xf-border: rgba(255, 255, 255, 0.85);
+
+  position: relative;
+  max-width: 1040px;
+  margin: 40px auto 0;
+  min-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #000;
+  overflow: hidden;
+}
+
+/* Content gets a faint CRT softening; the scanline overlay sits on top crisp-ish */
+.film .xf-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #4f93e8 0%, #2f6bd0 32%, #1c469a 66%, #122f72 100%);
+  filter: blur(0.4px) contrast(1.05) saturate(1.08);
+}
+
+/* Two rigid stacked sections with a hard divider between them */
+.film .xf-sec-top {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+  height: 240px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  border-bottom: 9px solid rgba(0, 0, 0, 0.5);
+  box-shadow: 0 9px 0 rgba(255, 255, 255, 0.14);
+  padding: 16px 24px 20px;
+}
+.film .xf-top-left {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 20px;
+  border-right: 6px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 3px 0 0 rgba(255, 255, 255, 0.18);
+}
+.film .xf-sec-bottom {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px 12px;
+}
+
+/* CRT scanlines + vignette overlay */
+.film .xf-crt {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.55;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0px, rgba(0,0,0,0.22) 1px, transparent 1px, transparent 3px),
+    radial-gradient(125% 100% at 50% 50%, transparent 66%, rgba(0,0,0,0.45) 100%);
+}
+
+/* Header */
+.film .xf-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+}
+.film .xf-logo {
+  font-size: 1.8rem; font-weight: 800; letter-spacing: -0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.film .xf-clock {
+  font-size: 1.05rem; font-weight: 700; color: #eaf2ff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.film .xf-badge {
+  margin-left: auto;
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #d01f1f; color: #fff;
+  border-radius: 4px; padding: 2px 8px; line-height: 1.05;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+.film .xf-badge b { font-size: 0.85rem; font-weight: 800; }
+.film .xf-badge span { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; }
+
+/* Top row: info (left) + preview (right) */
+.film .xf-top {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 22px;
+  align-items: start;
+}
+.film .xf-info {
+  display: flex; gap: 12px;
+  background: none;
+  border: none;
+  padding: 2px 0;
+}
+.film .xf-info-icon { font-size: 1.3rem; opacity: 0.9; }
+.film .xf-info-title {
+  font-size: 1.35rem; font-weight: 800; margin-bottom: 6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.film .xf-info-desc { font-size: 0.95rem; line-height: 1.5; color: #dce8fb; }
+
+.film .xf-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  background: #0a1c44;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.film .xf-preview img { width: 100%; height: 100%; object-fit: cover; }
+.film .xf-preview-cap {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 4px 8px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.7));
+  font-size: 0.8rem; font-weight: 700;
+}
+
+/* Two-column oval pills */
+.film .xf-pills {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+  flex: 1;
+  overflow-y: auto;
+  align-content: start;
+  padding: 4px;
+}
+.film .xf-pill {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 58px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--xf-pill-a), var(--xf-pill-b));
+  border: 3px solid var(--xf-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  text-align: center;
+}
+.film .xf-pill-label {
+  font-size: 1.3rem; font-weight: 700; color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.film .xf-pill.selected {
+  background: linear-gradient(180deg, var(--xf-yellow-a), var(--xf-yellow-b));
+  border-color: #fff;
+}
+.film .xf-pill.selected .xf-pill-label { color: #2a2a14; text-shadow: none; }
+
+.film .xf-more {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 0.9rem; font-weight: 700; color: #dce8fb;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 680px) {
+  .film .xf-top { grid-template-columns: 1fr; }
+  .film .xf-pills { grid-template-columns: 1fr; }
+}
+
+/* ── Film fullscreen player (Xfinity blue) ──────────────────────────────── */
+.film .xf-player,
+.film .xf-player-screen { width: 100%; height: 100%; }
+.film .xf-player-screen {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 22px 16px;
+  color: #fff;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(180deg, #4f93e8 0%, #2f6bd0 32%, #1c469a 66%, #122f72 100%);
+}
+.film .xf-player .xf-header { display: flex; align-items: center; gap: 14px; padding-bottom: 12px; }
+.film .xf-back {
+  background: none; border: none; cursor: pointer;
+  color: #fff; font-family: inherit; font-weight: 700; font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.film .xf-back:hover { color: #ffe98a; }
+.film .xf-player-title {
+  font-size: 1.2rem; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.film .xf-player .xf-badge { margin-left: auto; }
+
+.film .xf-player-stage {
+  flex: 1; min-height: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.film .xf-video {
+  position: relative;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;   /* matches the video; updated to the exact ratio on load */
+  background: #000;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.film .xf-video #film-mount { position: absolute; inset: 0; }
+.film .xf-video #film-mount > *,
+.film .xf-video video,
+.film .xf-video iframe {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  border: 0; object-fit: contain; background: #000;
+}
+
+.film .xf-transport { display: flex; align-items: center; gap: 14px; padding: 12px 2px 4px; }
+.film .xf-tbtn {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 48px; height: 40px; padding: 0 8px;
+  background: linear-gradient(180deg, #2f6ad0, #1c428f);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  color: #fff; font-size: 1.1rem; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.film .xf-tbtn.play { min-width: 62px; font-size: 1.2rem; }
+.film .xf-tbtn:hover { filter: brightness(1.1); }
+.film .xf-time { font-size: 0.9rem; min-width: 42px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4); }
+.film .xf-progress {
+  flex: 1; height: 12px; border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+}
+.film .xf-progress-fill { height: 100%; width: 0%; background: linear-gradient(180deg, #fffbcf, #ece08a); }
+.film .xf-player-desc {
+  font-size: 0.95rem; line-height: 1.45; color: #e6eefb;
+  padding-top: 10px; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
 /* ── Detail view ────────────────────────────────────────────────────────── */
 .film .tivo-detail { display: grid; grid-template-columns: 1.4fr 1fr; gap: 26px; align-items: start; }
 .film .detail-screen { cursor: pointer; padding: 0; border: 1px solid var(--tv-line); }
@@ -545,7 +863,7 @@ body.audio {
 
 /* ── Device body ────────────────────────────────────────────────────────── */
 .audio .ipod {
-  width: 300px;
+  width: 360px;
   padding: 22px 22px 26px;
   border-radius: 26px;
   background: linear-gradient(180deg, #313337 0%, #1a1b1e 58%, #0c0d0f 100%);
@@ -566,7 +884,7 @@ body.audio {
 }
 
 .audio .ipod-screen {
-  height: 220px;
+  height: 264px;
   background: var(--ipod-screen-bg);
   border-radius: 2px;
   overflow: hidden;
@@ -691,7 +1009,7 @@ body.audio {
 /* ── Click wheel ────────────────────────────────────────────────────────── */
 .audio .ipod-wheel {
   position: relative;
-  width: 220px; height: 220px;
+  width: 264px; height: 264px;
   margin: 0 auto;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 38%, #3c3e42 0%, #2a2c2f 60%, #1d1f21 100%);
@@ -718,7 +1036,7 @@ body.audio {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 78px; height: 78px;
+  width: 94px; height: 94px;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 38%, #46484c 0%, #303236 70%, #232528 100%);
   border: 1px solid #000;
@@ -848,12 +1166,12 @@ body.photography {
   --win-dark: #404040;       /* outer shadow                       */
   --win-title-a: #000080;    /* active title bar (navy)            */
   --win-title-b: #1084d0;    /* active title bar gradient end      */
-  --win-desktop: #3a6ea5;    /* fallback desktop colour (XP blue)  */
+  --win-desktop: #808080;    /* classic Windows desktop grey        */
   --win-font: "MS Sans Serif Web", Tahoma, "MS Sans Serif", Geneva, sans-serif;
 
   padding: 0;
-  /* Desktop wallpaper — drop your image at assets/ui/bliss.jpg */
-  background: var(--win-desktop) url("../ui/bliss.jpg") center center / cover no-repeat fixed;
+  /* Solid Windows grey desktop (bliss.jpg kept in repo at assets/ui/ if needed) */
+  background: var(--win-desktop);
   color: #000;
   font-family: var(--win-font);
   font-size: 12px;
@@ -872,6 +1190,59 @@ body.photography .desktop {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-bottom: 38px;   /* clear the fixed taskbar */
+}
+
+/* ── Windows 9x taskbar ─────────────────────────────────────────────────── */
+.photography .win-taskbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 30px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+  background: var(--win-face);
+  border-top: 1px solid var(--win-light);
+  box-shadow: inset 0 1px 0 var(--win-soft), 0 -1px 0 var(--win-shadow);
+  font-family: var(--win-font);
+}
+.photography .start-btn {
+  display: flex; align-items: center; gap: 5px;
+  height: 24px; padding: 2px 9px 3px 6px;
+  font-family: var(--win-font); font-weight: bold; font-size: 13px;
+  color: #000; cursor: pointer;
+  background: var(--win-face);
+  border: 2px solid;
+  border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+  box-shadow: inset 1px 1px 0 var(--win-soft), inset -1px -1px 0 var(--win-shadow);
+}
+.photography .start-btn:active {
+  border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+  box-shadow: inset 1px 1px 0 var(--win-shadow);
+}
+.photography .start-logo { display: flex; align-items: center; }
+
+.photography .taskbar-tasks { flex: 1; display: flex; gap: 4px; padding-left: 3px; min-width: 0; }
+.photography .task-btn {
+  display: flex; align-items: center; gap: 6px;
+  height: 24px; padding: 2px 9px;
+  max-width: 220px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-family: var(--win-font); font-size: 12px; color: #000; cursor: default;
+  background: var(--win-face);
+  /* pressed-in look (the active window) */
+  border: 2px solid;
+  border-color: var(--win-dark) var(--win-light) var(--win-light) var(--win-dark);
+  box-shadow: inset 1px 1px 0 var(--win-shadow);
+}
+
+.photography .taskbar-tray {
+  display: flex; align-items: center;
+  height: 24px; padding: 0 9px;
+  font-family: var(--win-font); font-size: 12px; color: #000;
+  border: 1px solid;
+  border-color: var(--win-shadow) var(--win-light) var(--win-light) var(--win-shadow);
 }
 
 /* ── Reusable window chrome ─────────────────────────────────────────────── */
